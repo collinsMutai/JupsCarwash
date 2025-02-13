@@ -1,0 +1,38 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-4">
+      <h2 class="text-center">{{ isRegistering ? 'Register' : 'Admin Login' }}</h2>
+      
+      <form (submit)="isRegistering ? register() : login(); $event.preventDefault()">
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-control" [(ngModel)]="username" name="username" required>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" [(ngModel)]="password" name="password" required>
+        </div>
+
+        <div class="mb-3" *ngIf="isRegistering">
+          <label class="form-label">Role</label>
+          <select class="form-control" [(ngModel)]="role" name="role" required>
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">
+          {{ isRegistering ? 'Register' : 'Login' }}
+        </button>
+      </form>
+
+      <!-- Toggle Between Login and Register -->
+      <div class="text-center mt-3">
+        <a class="btn btn-link" routerLink="{{ isRegistering ? '/login' : '/register' }}">
+          {{ isRegistering ? 'Already have an account? Login' : "Don't have an account? Register" }}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

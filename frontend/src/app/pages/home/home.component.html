@@ -1,0 +1,98 @@
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Invoice System</a>
+
+    <!-- Navbar toggler for mobile -->
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <!-- Show "Generate Invoice" button only for admins -->
+        <li class="nav-item" *ngIf="isAdmin">
+          <button
+            class="btn btn-outline-light me-2"
+            (click)="goToGenerateInvoice()"
+          >
+            Generate Invoice
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-danger" (click)="logout()">Logout</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Invoice List -->
+<div class="container mt-4">
+  <h2 class="text-center">Invoices</h2>
+
+  <table class="table table-striped table-bordered">
+    <thead class="table-dark">
+      <tr>
+        <th>Invoice #</th>
+        <th>Client</th>
+        <th>Total Amount</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let invoice of invoices">
+        <!-- 🔹 Invoice Row -->
+        <tr>
+          <td>{{ invoice.invoiceNumber }}</td>
+          <td>{{ invoice.clientName }}</td>
+          <td>KES {{ invoice.totalAmount.toFixed(2) }}</td>
+          <td>{{ invoice.date | date }}</td>
+          <td>
+            <button class="btn btn-info btn-sm me-2" (click)="invoice.showDetails = !invoice.showDetails">
+              {{ invoice.showDetails ? 'Hide Details' : 'View Details' }}
+            </button>
+            <button class="btn btn-success btn-sm me-2" (click)="downloadInvoice(invoice._id)">
+              Download PDF
+            </button>
+            <button class="btn btn-primary btn-sm" (click)="printInvoice(invoice._id)">
+              Print
+            </button>
+          </td>
+        </tr>
+
+        <!-- 🔽 Toggle Invoice Items Row -->
+        <tr *ngIf="invoice.showDetails">
+          <td colspan="5">
+            <div class="table-responsive">
+              <table class="table table-bordered mb-0">
+                <thead class="table-secondary">
+                  <tr>
+                    <th>Vehicle Reg #</th>
+                    <th>Description</th>
+                    <th>Amount (KES)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of invoice.items">
+                    <td>{{ item.vehicleRegNumber }}</td>
+                    <td>{{ item.description }}</td>
+                    <td>KES {{ item.amount.toFixed(2) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+</div>
+
+
