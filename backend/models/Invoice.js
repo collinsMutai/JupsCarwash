@@ -21,9 +21,9 @@ InvoiceSchema.pre("save", async function (next) {
   if (!this.invoiceNumber) {
     try {
       const counter = await Counter.findOneAndUpdate(
-        { name: "invoiceNumber" }, // Find the invoice counter
-        { $inc: { seq: 1 } }, // Increment sequence
-        { new: true, upsert: true } // Create if doesn't exist
+        { name: "invoiceNumber" },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
       );
 
       this.invoiceNumber = `INV-${String(counter.seq).padStart(4, "0")}`;

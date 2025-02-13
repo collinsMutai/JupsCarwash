@@ -12,7 +12,7 @@ function generateInvoicePDF(invoice, res) {
 
     doc.pipe(res);
 
-    // ✅ BRAND HEADER
+    // ✅ HEADER
     doc
       .fontSize(22)
       .font("Helvetica-Bold")
@@ -26,7 +26,6 @@ function generateInvoicePDF(invoice, res) {
       .text("We know dirt!", 50, doc.y)
       .moveDown(2);
 
-    // ✅ INVOICE TITLE
     doc
       .fontSize(20)
       .font("Helvetica-Bold")
@@ -53,40 +52,34 @@ function generateInvoicePDF(invoice, res) {
       .fill()
       .fillColor("white")
       .fontSize(12)
-      .text("Invoice #", 55, tableTop + 5)
-      .text("Client", 160, tableTop + 5)
-      .text("Amount (KES)", 330, tableTop + 5, { align: "left" })
-      .text("Date", 460, tableTop + 5, { align: "left" })
+      .text("Vehicle Reg #", 55, tableTop + 5)
+      .text("Description", 200, tableTop + 5)
+      .text("Amount (KES)", 400, tableTop + 5)
       .fillColor("black")
       .moveDown();
 
-    // ✅ DRAW SEPARATOR LINE
     doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
 
-    // ✅ TABLE ROW
-    const rowTop = doc.y + 5;
-    doc
-      .fontSize(12)
-      .text(invoice.invoiceNumber, 55, rowTop)
-      .text(invoice.clientName, 160, rowTop)
-      .text(invoice.totalAmount.toFixed(2), 330, rowTop, { align: "left" })
-      .text(new Date(invoice.date).toLocaleDateString(), 460, rowTop, {
-        align: "left",
-      })
-      .moveDown();
+    // ✅ TABLE ROWS (Invoice Items)
+    invoice.items.forEach((item) => {
+      const rowTop = doc.y + 5;
+      doc
+        .fontSize(12)
+        .text(item.vehicleRegNumber, 55, rowTop)
+        .text(item.description, 200, rowTop)
+        .text(`KES ${item.amount.toFixed(2)}`, 400, rowTop)
+        .moveDown();
 
-    // ✅ DRAW SEPARATOR LINE
-    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+      doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+    });
 
-    // ✅ TOTAL
-    const labelX = 410;
-    const valueX = 420;
+    // ✅ TOTAL AMOUNT
     doc
       .moveDown(2)
       .fontSize(12)
       .font("Helvetica-Bold")
-      .text("Total:", labelX, doc.y, { continued: true })
-      .text(` KES ${invoice.totalAmount.toFixed(2)}`, valueX);
+      .text("Total:", 400, doc.y, { continued: true })
+      .text(`KES ${invoice.totalAmount.toFixed(2)}`);
 
     // ✅ FOOTER
     doc
@@ -100,26 +93,17 @@ function generateInvoicePDF(invoice, res) {
       .text("Phone: 0729138753 | 0726097666", 50, doc.y + 10)
       .moveDown(2);
 
-    // ✅ "THANK YOU" MESSAGE
     doc
       .fontSize(14)
       .font("Helvetica-Bold")
       .text("Thank You for Your Business!", { align: "center" });
 
-    // ✅ Finalize PDF and end response
+    // ✅ Finalize PDF
     doc.end();
-
-    // ✅ Handle Response Stream Closing Gracefully
-    res.on("finish", () => {
-      console.log(
-        `✅ PDF successfully sent for invoice: ${invoice.invoiceNumber}`
-      );
-    });
   } catch (error) {
     console.error("❌ Error generating PDF:", error);
-
     if (!res.headersSent) {
-      res.status(500).send({ error: "Failed to generate PDF" });
+      res.status(500).json({ error: error.message });
     }
   }
 }
