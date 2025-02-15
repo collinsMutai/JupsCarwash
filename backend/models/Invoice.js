@@ -12,7 +12,7 @@ const InvoiceSchema = new mongoose.Schema({
     },
   ],
   totalAmount: { type: Number, required: true }, // Total for all vehicles
-  date: { type: Date, default: Date.now },
+  date: { type: Date, required: true }, // ✅ Use date from frontend (must be provided)
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 });
 

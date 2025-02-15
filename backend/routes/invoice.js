@@ -41,11 +41,20 @@ router.post("/", auth, async (req, res) => {
       0
     );
 
+    // ✅ Use provided date, or fallback to now
+    const invoiceDate = req.body.date ? new Date(req.body.date) : new Date();
+
+    // ✅ Ensure the provided date is valid
+    if (isNaN(invoiceDate.getTime())) {
+      return res.status(400).send({ error: "Invalid date format" });
+    }
+
     const invoice = new Invoice({
       invoiceNumber,
       clientName: req.body.clientName,
       items: req.body.items, // ✅ Multiple vehicles
       totalAmount, // ✅ Auto-calculated total
+      date: invoiceDate, // ✅ Use frontend date
       createdBy: req.user._id,
     });
 

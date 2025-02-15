@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environments';
 
 @Component({
   selector: 'app-generate-invoice',
@@ -34,7 +35,7 @@ export class GenerateInvoiceComponent implements OnInit {
 
     this.http
       .get<{ nextInvoiceNumber: string }>(
-        'http://localhost:5000/api/invoices/next-invoice-number',
+        `${environment.baseUrl}/invoices/next-invoice-number`,
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -85,7 +86,7 @@ export class GenerateInvoiceComponent implements OnInit {
     };
 
     this.http
-      .post('http://localhost:5000/api/invoices', invoiceData, {
+      .post(`${environment.baseUrl}/invoices`, invoiceData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',

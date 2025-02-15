@@ -23,7 +23,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // ✅ CORS Configuration (Handles Frontend Requests)
 app.use(
   cors({
-    origin: "http://localhost:4200", // ✅ Allow only frontend
+    origin: "https://jupscarwash.onrender.com", // ✅ Allow only frontend
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // ✅ Allow sending cookies & auth headers
