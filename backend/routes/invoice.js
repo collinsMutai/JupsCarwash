@@ -8,12 +8,24 @@ const generateInvoicePDF = require("../utils/generateInvoicePdf");
 // ✅ GET Next Invoice Number (DO NOT INCREMENT)
 router.get("/next-invoice-number", auth, async (req, res) => {
   try {
-    let counter = await Counter.findOne({ name: "invoiceNumber" });
+    // Find the most recent invoice number
+    const lastInvoice = await Invoice.findOne()
+      .sort({ invoiceNumber: -1 })
+      .limit(1);
 
-    const nextInvoiceNumber = `INV-${String((counter?.seq || 0) + 1).padStart(
+    let lastInvoiceNumber = "INV-0000"; // Default if no invoices exist
+
+    if (lastInvoice) {
+      // Extract the numeric part of the last invoice number
+      lastInvoiceNumber = lastInvoice.invoiceNumber;
+    }
+
+    const lastInvoiceSeq = parseInt(lastInvoiceNumber.split("-")[1], 10) || 0; // Get the number part of the last invoice number
+    const nextInvoiceNumber = `INV-${String(lastInvoiceSeq + 1).padStart(
       4,
       "0"
     )}`;
+
     res.json({ nextInvoiceNumber });
   } catch (error) {
     res.status(500).send({ error: "Failed to fetch the next invoice number" });
@@ -27,24 +39,28 @@ router.post("/", auth, async (req, res) => {
   }
 
   try {
-    let counter = await Counter.findOneAndUpdate(
-      { name: "invoiceNumber" },
-      { $inc: { seq: 1 } }, // ✅ Increment invoice number
-      { new: true, upsert: true }
-    );
+    // Get the next invoice number based on the most recent invoice
+    const lastInvoice = await Invoice.findOne()
+      .sort({ invoiceNumber: -1 })
+      .limit(1);
+    let lastInvoiceNumber = "INV-0000"; // Default if no invoices exist
 
-    const invoiceNumber = `INV-${String(counter.seq).padStart(4, "0")}`;
+    if (lastInvoice) {
+      lastInvoiceNumber = lastInvoice.invoiceNumber;
+    }
 
-    // ✅ Calculate total amount from items
-    const totalAmount = req.body.items.reduce(
-      (sum, item) => sum + item.amount,
-      0
-    );
+    const lastInvoiceSeq = parseInt(lastInvoiceNumber.split("-")[1], 10) || 0; // Get the numeric part of the last invoice number
+    const invoiceNumber = `INV-${String(lastInvoiceSeq + 1).padStart(4, "0")}`;
 
-    // ✅ Use provided date, or fallback to now
+    // Calculate total amount from items, including quantity
+    const totalAmount = req.body.items.reduce((sum, item) => {
+      return sum + item.amount * item.quantity;
+    }, 0);
+
+    // Use provided date, or fallback to now
     const invoiceDate = req.body.date ? new Date(req.body.date) : new Date();
 
-    // ✅ Ensure the provided date is valid
+    // Ensure the provided date is valid
     if (isNaN(invoiceDate.getTime())) {
       return res.status(400).send({ error: "Invalid date format" });
     }
@@ -52,9 +68,9 @@ router.post("/", auth, async (req, res) => {
     const invoice = new Invoice({
       invoiceNumber,
       clientName: req.body.clientName,
-      items: req.body.items, // ✅ Multiple vehicles
-      totalAmount, // ✅ Auto-calculated total
-      date: invoiceDate, // ✅ Use frontend date
+      items: req.body.items, // Multiple vehicles with quantity
+      totalAmount, // Auto-calculated total based on quantity
+      date: invoiceDate, // Use frontend date
       createdBy: req.user._id,
     });
 
@@ -81,7 +97,7 @@ router.get("/:id/pdf", auth, async (req, res) => {
     const invoice = await Invoice.findById(req.params.id);
     if (!invoice) return res.status(404).send({ error: "Invoice not found" });
 
-    generateInvoicePDF(invoice, res); // ✅ All users can download/print
+    generateInvoicePDF(invoice, res); // All users can download/print
   } catch (e) {
     res.status(500).send({ error: "Failed to generate PDF" });
   }

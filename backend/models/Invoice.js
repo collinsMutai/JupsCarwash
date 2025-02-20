@@ -9,6 +9,7 @@ const InvoiceSchema = new mongoose.Schema({
       vehicleRegNumber: { type: String, required: true }, // Vehicle Registration
       description: { type: String, required: true }, // Service/Repair Description
       amount: { type: Number, required: true }, // Charge for this vehicle
+      quantity: { type: Number, required: true, min: 1 }, // Quantity of the item/service
     },
   ],
   totalAmount: { type: Number, required: true }, // Total for all vehicles

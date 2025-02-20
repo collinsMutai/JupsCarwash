@@ -54,7 +54,8 @@ function generateInvoicePDF(invoice, res) {
       .fontSize(12)
       .text("Vehicle Reg #", 55, tableTop + 5)
       .text("Description", 200, tableTop + 5)
-      .text("Amount (KES)", 400, tableTop + 5)
+      .text("Quantity", 380, tableTop + 5) // Add the Quantity column header
+      .text("Amount (KES)", 460, tableTop + 5)
       .fillColor("black")
       .moveDown();
 
@@ -67,7 +68,8 @@ function generateInvoicePDF(invoice, res) {
         .fontSize(12)
         .text(item.vehicleRegNumber, 55, rowTop)
         .text(item.description, 200, rowTop)
-        .text(`KES ${item.amount.toFixed(2)}`, 400, rowTop)
+        .text(item.quantity.toString(), 380, rowTop) // Display quantity
+        .text(`KES ${item.amount.toFixed(2)}`, 460, rowTop)
         .moveDown();
 
       doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();

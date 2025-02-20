@@ -44,6 +44,11 @@ export class ApiService {
     });
   }
 
+  // 🔹 Vehicle APIs
+  getVehicles(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/vehicles`, this.getHeaders());
+  }
+
   // 🔹 Utility Functions
   private getHeaders() {
     return { headers: this.getAuthHeaders() };

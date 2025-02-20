@@ -3,41 +3,108 @@
   <form (submit)="generateInvoice(); $event.preventDefault()">
     <div class="mb-3">
       <label class="form-label">Invoice Number</label>
-      <input type="text" class="form-control" [(ngModel)]="invoiceNumber" name="invoiceNumber" readonly />
+      <input
+        type="text"
+        class="form-control"
+        [(ngModel)]="invoiceNumber"
+        name="invoiceNumber"
+        readonly
+      />
     </div>
     <div class="mb-3">
       <label class="form-label">Client Name</label>
-      <input type="text" class="form-control" [(ngModel)]="clientName" name="clientName" required />
+      <input
+        type="text"
+        class="form-control"
+        [(ngModel)]="clientName"
+        name="clientName"
+        required
+      />
     </div>
     <div class="mb-3">
       <label class="form-label">Invoice Date</label>
-      <input type="date" class="form-control" [(ngModel)]="date" name="date" required />
+      <input
+        type="date"
+        class="form-control"
+        [(ngModel)]="date"
+        name="date"
+        required
+      />
     </div>
 
     <h4>Vehicle Details</h4>
     <div *ngFor="let item of items; let i = index" class="card p-3 mb-3">
       <div class="row">
-        <div class="col-md-4">
-          <label class="form-label">Vehicle Reg Number</label>
-          <input type="text" class="form-control" [(ngModel)]="item.vehicleRegNumber" name="vehicleRegNumber{{i}}" required />
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Description</label>
-          <input type="text" class="form-control" [(ngModel)]="item.description" name="description{{i}}" required />
+        <div class="col-md-3">
+          <label class="form-label">Vehicle</label>
+          <select
+            class="form-control"
+            [(ngModel)]="item.vehicleId"
+            name="vehicle{{ i }}"
+            (change)="setVehicleRegNumber(item)"
+          >
+            <option value="" disabled>Select Vehicle</option>
+            <option *ngFor="let vehicle of vehicles" [value]="vehicle._id">
+              {{ vehicle.vehicleRegNumber }} - {{ vehicle.model }}
+            </option>
+          </select>
         </div>
         <div class="col-md-3">
+          <label class="form-label">Description</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="item.description"
+            name="description{{ i }}"
+            required
+          />
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Quantity</label>
+          <input
+            type="number"
+            class="form-control"
+            [(ngModel)]="item.quantity"
+            name="quantity{{ i }}"
+            required
+            min="1"
+          />
+        </div>
+        <div class="col-md-2">
           <label class="form-label">Amount (KES)</label>
-          <input type="number" class="form-control" [(ngModel)]="item.amount" name="amount{{i}}" required (input)="calculateTotal()" />
+          <input
+            type="number"
+            class="form-control"
+            [(ngModel)]="item.amount"
+            name="amount{{ i }}"
+            required
+            (input)="calculateTotal()"
+          />
         </div>
         <div class="col-md-1 d-flex align-items-end">
-          <button type="button" class="btn btn-danger" (click)="removeItem(i)" *ngIf="items.length > 1">X</button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="removeItem(i)"
+            *ngIf="items.length > 1"
+          >
+            X
+          </button>
         </div>
       </div>
     </div>
 
-    <button type="button" class="btn btn-success w-100 mb-3" (click)="addItem()">+ Add Vehicle</button>
+    <button
+      type="button"
+      class="btn btn-success w-100 mb-3"
+      (click)="addItem()"
+    >
+      + Add Vehicle
+    </button>
 
-    <h4 class="text-end">Total Amount: <strong>KES {{ totalAmount }}</strong></h4>
+    <h4 class="text-end">
+      Total Amount: <strong>KES {{ totalAmount }}</strong>
+    </h4>
 
     <button type="submit" class="btn btn-primary w-100">Create Invoice</button>
   </form>
