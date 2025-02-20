@@ -1,14 +1,14 @@
 const mongoose = require("mongoose");
 const Invoice = require("./models/Invoice"); // Import your Invoice model
+require("dotenv").config();
 
 // MongoDB Atlas connection string
-// mongodb+srv://nodejsshop23:nodejsshop23@cluster0.npgx5av.mongodb.net/jupscarwash
-const mongoURI =
-  "mongodb+srv://nodejsshop23:nodejsshop23@cluster0.npgx5av.mongodb.net/jupscarwash";
+
+
 
 // Connect to MongoDB Atlas
 mongoose
-  .connect(mongoURI, {
+  .connect(process.env.DB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
