@@ -174,7 +174,7 @@ export class GenerateInvoiceComponent implements OnInit {
       .subscribe({
         next: (response) => {
           alert('Invoice created successfully!');
-          this.router.navigate(['/home']);
+          this.router.navigate(['/']);
         },
         error: (err) => {
           console.error('Error creating invoice:', err);

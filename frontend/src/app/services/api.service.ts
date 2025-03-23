@@ -49,6 +49,14 @@ export class ApiService {
     return this.http.get(`${this.baseUrl}/vehicles`, this.getHeaders());
   }
 
+  createVehicle(vehicle: any): Observable<any> {
+    return this.http.post(
+      `${this.baseUrl}/vehicles`,
+      vehicle,
+      this.getHeaders()
+    );
+  }
+
   // 🔹 Utility Functions
   private getHeaders() {
     return { headers: this.getAuthHeaders() };

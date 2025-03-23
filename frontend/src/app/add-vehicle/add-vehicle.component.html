@@ -1,0 +1,43 @@
+<div class="container">
+  <h2>Add New Vehicle</h2>
+
+  <!-- Show success or error messages -->
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+  <div *ngIf="successMessage" class="success">{{ successMessage }}</div>
+
+  <!-- Vehicle Form -->
+  <form (ngSubmit)="onSubmit()">
+    <div>
+      <label for="vehicleRegNumber">Vehicle Registration Number:</label>
+      <input
+        type="text"
+        id="vehicleRegNumber"
+        [(ngModel)]="vehicleRegNumber"
+        name="vehicleRegNumber"
+        required
+      />
+    </div>
+
+    <div>
+      <label for="make">Make:</label>
+      <input type="text" id="make" [(ngModel)]="make" name="make" />
+    </div>
+
+    <div>
+      <label for="model">Model:</label>
+      <input type="text" id="model" [(ngModel)]="model" name="model" />
+    </div>
+
+    <div>
+      <label for="year">Year:</label>
+      <input type="number" id="year" [(ngModel)]="year" name="year" />
+    </div>
+
+    <div>
+      <label for="ownerName">Owner Name:</label>
+      <input type="text" id="ownerName" [(ngModel)]="ownerName" name="ownerName" />
+    </div>
+
+    <button type="submit">Add Vehicle</button>
+  </form>
+</div>

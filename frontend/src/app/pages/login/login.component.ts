@@ -34,7 +34,7 @@ export class LoginComponent {
         next: (res) => {
           localStorage.setItem('token', res.token);
           localStorage.setItem('role', res.user.role);
-          this.router.navigate(['/home']);
+          this.router.navigate(['/']);
         },
         error: (err) => alert('Login failed! ' + err.error?.message),
       });
