@@ -118,4 +118,23 @@ export class HomeComponent {
     localStorage.removeItem('token');
     this.router.navigate(['/login']);
   }
+
+  // Method to delete the invoice
+  deleteInvoice(invoice: Invoice) {
+    const confirmation = window.confirm(
+      'Are you sure you want to delete this invoice?'
+    );
+
+    if (confirmation) {
+      this.apiService.deleteInvoice(invoice._id).subscribe({
+        next: () => {
+          // Remove the deleted invoice from the list
+          this.invoices = this.invoices.filter(
+            (inv) => inv._id !== invoice._id
+          );
+        },
+        error: (err) => console.error('Error deleting invoice:', err),
+      });
+    }
+  }
 }

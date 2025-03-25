@@ -112,4 +112,25 @@ router.get("/:id/pdf", auth, async (req, res) => {
   }
 });
 
+// ✅ DELETE Invoice (Admin Only)
+router.delete("/:id", auth, async (req, res) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).send({ error: "Access denied" });
+  }
+
+  try {
+    const invoice = await Invoice.findByIdAndDelete(req.params.id);
+
+    if (!invoice) {
+      return res.status(404).send({ error: "Invoice not found" });
+    }
+
+    res.send({ message: "Invoice deleted successfully" });
+  } catch (e) {
+    res.status(500).send({ error: "Failed to delete the invoice" });
+  }
+});
+
+
 module.exports = router;
+

@@ -44,6 +44,13 @@ export class ApiService {
     });
   }
 
+  // 🔹 Delete an Invoice
+  deleteInvoice(invoiceId: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/invoices/${invoiceId}`, {
+      headers: this.getAuthHeaders(),
+    });
+  }
+
   // 🔹 Vehicle APIs
   getVehicles(): Observable<any> {
     return this.http.get(`${this.baseUrl}/vehicles`, this.getHeaders());

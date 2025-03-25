@@ -15,10 +15,13 @@
 
     <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
       <ul class="navbar-nav">
+        <!-- Only visible if the user is an admin -->
         <li class="nav-item" *ngIf="isAdmin">
           <a
             class="btn btn-outline-light me-2"
-            routerLink="/create-vehicle" 
+            routerLink="/create-vehicle"
+            routerLinkActive="active"
+            aria-current="page"
           >
             Create Vehicle
           </a>
@@ -32,6 +35,17 @@
             Generate Invoice
           </button>
         </li>
+        <!-- Link for the invoice list (always visible) -->
+        <li class="nav-item">
+          <a
+            class="btn btn-outline-light me-2"
+            routerLink="/home"
+            routerLinkActive="active"
+          >
+            Invoice List
+          </a>
+        </li>
+        <!-- Show logout button -->
         <li class="nav-item">
           <button class="btn btn-danger" (click)="logout()">Logout</button>
         </li>
@@ -39,6 +53,8 @@
     </div>
   </div>
 </nav>
+
+
 
 <!-- Invoice List -->
 <div class="container mt-4">
@@ -55,6 +71,7 @@
           <th>Date</th>
           <th>Actions</th>
           <th *ngIf="isAdmin">Duplicate</th> <!-- Added Duplicate column header -->
+          <th *ngIf="isAdmin">Delete</th> <!-- Added Delete column header -->
         </tr>
       </thead>
       <tbody>
@@ -81,11 +98,16 @@
                 Duplicate
               </button>
             </td>
+            <td *ngIf="isAdmin">
+              <button class="btn btn-danger btn-sm" (click)="deleteInvoice(invoice)">
+                Delete
+              </button>
+            </td>
           </tr>
 
           <!-- 🔽 Toggle Invoice Items Row -->
           <tr *ngIf="invoice.showDetails">
-            <td colspan="6">
+            <td colspan="7">
               <div class="table-responsive">
                 <table class="table table-bordered mb-0">
                   <thead class="table-secondary">
