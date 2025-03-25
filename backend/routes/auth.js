@@ -6,9 +6,9 @@ const bcrypt = require("bcryptjs");
 
 // REGISTER
 router.post("/register", async (req, res) => {
-  const { username, password, role } = req.body;
+  const { username, password, role, name } = req.body; // Include 'name' in the destructured body
   try {
-    const user = new User({ username, password, role });
+    const user = new User({ username, password, role, name }); // Include 'name' in the user model
     await user.save();
 
     // Include role in the token

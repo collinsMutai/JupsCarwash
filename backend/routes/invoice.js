@@ -84,12 +84,21 @@ router.post("/", auth, async (req, res) => {
 // ✅ GET All Invoices (Both Admin & Users See All)
 router.get("/", auth, async (req, res) => {
   try {
-    const invoices = await Invoice.find();
-    res.send(invoices);
+    // Check if the user is an admin
+    if (req.user.role === "admin") {
+      // Admin users get all invoices
+      const invoices = await Invoice.find();
+      return res.send(invoices);
+    } else {
+      // Non-admin users get only their invoices
+      const invoices = await Invoice.find({ clientName: req.user.name });
+      return res.send(invoices);
+    }
   } catch (e) {
     res.status(500).send({ error: "Fetching invoices failed" });
   }
 });
+
 
 // ✅ GENERATE PDF for an Invoice (Allow All Users)
 router.get("/:id/pdf", auth, async (req, res) => {
