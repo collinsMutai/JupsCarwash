@@ -36,7 +36,7 @@
           </button>
         </li>
         <!-- Link for the invoice list (always visible) -->
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="isAdmin">
           <a
             class="btn btn-outline-light me-2"
             routerLink="/home"
