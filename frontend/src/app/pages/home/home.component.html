@@ -54,7 +54,7 @@
           <th>Total Amount</th>
           <th>Date</th>
           <th>Actions</th>
-          <th>Duplicate</th> <!-- Added Duplicate column header -->
+          <th *ngIf="isAdmin">Duplicate</th> <!-- Added Duplicate column header -->
         </tr>
       </thead>
       <tbody>
@@ -76,7 +76,7 @@
                 Print
               </button>
             </td>
-            <td>
+            <td *ngIf="isAdmin">
               <button class="btn btn-warning btn-sm" (click)="duplicateInvoice(invoice)">
                 Duplicate
               </button>
