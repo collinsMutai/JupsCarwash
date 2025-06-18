@@ -14,17 +14,47 @@ import { ApiService } from '../../services/api.service';
 export class LoginComponent {
   username = '';
   password = '';
-  role = 'user'; // Default role for registration
-  isRegistering = false; // Dynamic state
+  email = '';
+  role = 'user';
+  isRegistering = false;
+  isResetting = false;
+
   private apiService = inject(ApiService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   ngOnInit() {
-    // Detect whether we're on /login or /register
     this.route.data.subscribe((data) => {
       this.isRegistering = data['isRegistering'] || false;
     });
+  }
+
+  toggleRegister() {
+    this.isRegistering = !this.isRegistering;
+    this.isResetting = false;
+    this.clearFields();
+  }
+
+  toggleReset() {
+    this.isResetting = !this.isResetting;
+    this.isRegistering = false;
+    this.clearFields();
+  }
+
+  clearFields() {
+    this.username = '';
+    this.password = '';
+    this.email = '';
+  }
+
+  onSubmit() {
+    if (this.isResetting) {
+      this.requestPasswordReset();
+    } else if (this.isRegistering) {
+      this.register();
+    } else {
+      this.login();
+    }
   }
 
   login() {
@@ -36,7 +66,8 @@ export class LoginComponent {
           localStorage.setItem('role', res.user.role);
           this.router.navigate(['/']);
         },
-        error: (err) => alert('Login failed! ' + err.error?.message),
+        error: (err) =>
+          alert('Login failed! ' + err.error?.message || 'Unexpected error'),
       });
   }
 
@@ -52,7 +83,24 @@ export class LoginComponent {
           alert('Registration successful! Please log in.');
           this.router.navigate(['/login']);
         },
-        error: (err) => alert('Registration failed! ' + err.error?.message),
+        error: (err) =>
+          alert(
+            'Registration failed! ' + err.error?.message || 'Unexpected error'
+          ),
       });
+  }
+
+  requestPasswordReset() {
+    this.apiService.requestPasswordReset(this.email).subscribe({
+      next: () => {
+        alert('Reset email sent! Check your inbox.');
+        this.toggleReset();
+      },
+      error: (err) =>
+        alert(
+          'Error sending reset email: ' + err.error?.message ||
+            'Unexpected error'
+        ),
+    });
   }
 }

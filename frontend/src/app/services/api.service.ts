@@ -11,7 +11,7 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  // 🔹 Authentication APIs
+  // 🔐 Authentication APIs
   login(credentials: { username: string; password: string }): Observable<any> {
     return this.http.post(`${this.baseUrl}/auth/login`, credentials);
   }
@@ -20,11 +20,29 @@ export class ApiService {
     username: string;
     password: string;
     role: string;
+    email?: string;
   }): Observable<any> {
     return this.http.post(`${this.baseUrl}/auth/register`, user);
   }
 
-  // 🔹 Invoice APIs
+  changePassword(
+    currentPassword: string,
+    newPassword: string
+  ): Observable<any> {
+    return this.http.post(
+      `${this.baseUrl}/auth/change-password`,
+      { currentPassword, newPassword },
+      this.getHeaders()
+    );
+  }
+
+  requestPasswordReset(email: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/auth/request-password-reset`, {
+      email,
+    });
+  }
+
+  // 🧾 Invoice APIs
   getInvoices(): Observable<any> {
     return this.http.get(`${this.baseUrl}/invoices`, this.getHeaders());
   }
@@ -44,14 +62,13 @@ export class ApiService {
     });
   }
 
-  // 🔹 Delete an Invoice
   deleteInvoice(invoiceId: string): Observable<any> {
     return this.http.delete(`${this.baseUrl}/invoices/${invoiceId}`, {
       headers: this.getAuthHeaders(),
     });
   }
 
-  // 🔹 Vehicle APIs
+  // 🚗 Vehicle APIs
   getVehicles(): Observable<any> {
     return this.http.get(`${this.baseUrl}/vehicles`, this.getHeaders());
   }
@@ -64,13 +81,15 @@ export class ApiService {
     );
   }
 
-  // 🔹 Utility Functions
+  // 🔧 Utility
   private getHeaders() {
     return { headers: this.getAuthHeaders() };
   }
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
-    return new HttpHeaders({ Authorization: `Bearer ${token}` });
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
   }
 }

@@ -1,14 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { ApiService } from '../../services/api.service'; // ✅ Import ApiService
+import { ApiService } from '../../services/api.service';
 
-// Define interfaces here or import from types.ts if you're using that approach
 interface InvoiceItem {
   vehicleRegNumber: string;
   description: string;
   amount: number;
-  quantity?: number; // Optional
+  quantity?: number;
   _id: string;
 }
 
@@ -32,49 +31,64 @@ interface Invoice {
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent {
-  invoices: Invoice[] = []; // Strongly type invoices as an array of Invoice objects
+  invoices: Invoice[] = [];
+  paginatedInvoices: Invoice[] = [];
   isAdmin = false;
-  private apiService = inject(ApiService); // ✅ Use ApiService
+  currentPage = 1;
+  pageSize = 10;
+
+  private apiService = inject(ApiService);
   private router = inject(Router);
 
   ngOnInit() {
     const token = localStorage.getItem('token');
-
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split('.')[1])); // ✅ Decode JWT payload
+        const payload = JSON.parse(atob(token.split('.')[1]));
         this.isAdmin = payload.role === 'admin';
       } catch (error) {
         console.error('Invalid token:', error);
       }
     }
 
-    // ✅ Fetch invoices via ApiService
     this.apiService.getInvoices().subscribe({
       next: (data: Invoice[]) => {
-        // Type the response as an array of invoices
-        this.invoices = data;
-        this.invoices.forEach((invoice) => {
+        this.invoices = data.map((invoice) => {
           invoice.items.forEach((item) => {
-            if (!item.quantity) {
-              item.quantity = 1; // Set default quantity to 1 if missing
-            }
+            if (!item.quantity) item.quantity = 1;
           });
+          return invoice;
         });
+        this.updatePaginatedInvoices();
       },
       error: (err) => console.error(err),
     });
   }
 
-  // Method to duplicate the invoice
-  duplicateInvoice(invoice: Invoice) {
-    const newInvoice = { ...invoice, _id: undefined, invoiceNumber: undefined }; // Remove _id and invoiceNumber for new invoice
+  updatePaginatedInvoices() {
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    this.paginatedInvoices = this.invoices.slice(start, end);
+  }
 
-    // Create a new invoice with the same details
+  goToPage(page: number) {
+    this.currentPage = page;
+    this.updatePaginatedInvoices();
+  }
+
+  get totalPages(): number[] {
+    return Array.from(
+      { length: Math.ceil(this.invoices.length / this.pageSize) },
+      (_, i) => i + 1
+    );
+  }
+
+  duplicateInvoice(invoice: Invoice) {
+    const newInvoice = { ...invoice, _id: undefined, invoiceNumber: undefined };
     this.apiService.createInvoice(newInvoice).subscribe({
       next: (createdInvoice) => {
-        // Reload the invoice list after creating the new invoice
         this.invoices.push(createdInvoice);
+        this.updatePaginatedInvoices();
       },
       error: (err) => console.error('Error duplicating invoice:', err),
     });
@@ -103,7 +117,7 @@ export class HomeComponent {
         if (newWindow) {
           newWindow.onload = () => newWindow.print();
         } else {
-          console.error('Popup blocked. Allow popups to print the invoice.');
+          console.error('Popup blocked.');
         }
       },
       error: (err) => console.error('Print error:', err),
@@ -119,19 +133,17 @@ export class HomeComponent {
     this.router.navigate(['/login']);
   }
 
-  // Method to delete the invoice
   deleteInvoice(invoice: Invoice) {
     const confirmation = window.confirm(
       'Are you sure you want to delete this invoice?'
     );
-
     if (confirmation) {
       this.apiService.deleteInvoice(invoice._id).subscribe({
         next: () => {
-          // Remove the deleted invoice from the list
           this.invoices = this.invoices.filter(
             (inv) => inv._id !== invoice._id
           );
+          this.updatePaginatedInvoices();
         },
         error: (err) => console.error('Error deleting invoice:', err),
       });
