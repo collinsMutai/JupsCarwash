@@ -114,31 +114,55 @@ router.post("/request-password-reset", async (req, res) => {
 });
 
 // RESET PASSWORD
-router.post("/reset-password", async (req, res) => {
+router.post("/reset-password", (req, res) => {
   const { token, newPassword } = req.body;
-  try {
-    console.log("🔄 Resetting password with token:", token);
-    const user = await User.findOne({
-      resetToken: token,
-      resetTokenExpiration: { $gt: Date.now() },
+  console.log("🔄 Resetting password with token:", token);
+
+  User.findOne({
+    resetToken: token,
+    resetTokenExpiration: { $gt: Date.now() },
+  })
+    .then((user) => {
+      if (!user) {
+        console.warn("⚠️ Invalid or expired reset token");
+        return res.status(400).send({ error: "Invalid or expired token" });
+      }
+
+      user.password = newPassword;
+      user.resetToken = undefined;
+      user.resetTokenExpiration = undefined;
+
+      return user.save().then(() => {
+        console.log("✅ Password reset successful for user:", user.email);
+
+        // ✅ Send success response immediately
+        res.send({ message: "Password reset successful" });
+
+        // ✅ Fire-and-forget confirmation email
+        return transporter
+          .sendMail({
+            from: process.env.EMAIL_USER,
+            to: user.email,
+            subject: "Your Password Has Been Reset",
+            html: `
+            <p>Hello ${user.username},</p>
+            <p>Your password has been successfully reset.</p>
+            <p>If you didn't do this, please contact support immediately.</p>
+          `,
+          })
+          .then(() => console.log("📧 Confirmation email sent to:", user.email))
+          .catch((emailErr) =>
+            console.error(
+              "❌ Failed to send confirmation email:",
+              emailErr.message
+            )
+          );
+      });
+    })
+    .catch((err) => {
+      console.error("❌ Error in /reset-password:", err.message);
+      res.status(500).send({ error: "Password reset failed" });
     });
-
-    if (!user) {
-      console.warn("⚠️ Invalid or expired reset token");
-      return res.status(400).send({ error: "Invalid or expired token" });
-    }
-
-    user.password = newPassword;
-    user.resetToken = undefined;
-    user.resetTokenExpiration = undefined;
-    await user.save();
-
-    console.log("✅ Password reset successful for user:", user.email);
-    res.send({ message: "Password reset successful" });
-  } catch (e) {
-    console.error("❌ Password reset error:", e.message);
-    res.status(500).send({ error: "Password reset failed" });
-  }
 });
 
 // CHANGE PASSWORD (JWT)
