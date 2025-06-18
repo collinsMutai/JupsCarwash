@@ -89,6 +89,9 @@ router.post("/request-password-reset", async (req, res) => {
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
     console.log("🔗 Reset link generated:", resetLink);
 
+    console.log("📧 EMAIL_USER:", process.env.EMAIL_USER);
+    console.log("📧 EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
+
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: user.email,
