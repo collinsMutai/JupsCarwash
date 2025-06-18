@@ -1,59 +1,51 @@
-// app.js
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const helmet = require("helmet");
 const connectDB = require("./config/db");
+const path = require("path");
 
 const app = express();
 
-// ✅ Connect to Database
+// ✅ Connect to MongoDB
 connectDB();
 
-// ✅ Security Headers with Helmet
+// ✅ Middleware
 app.use(
   helmet({
-    crossOriginResourcePolicy: false, // ✅ Allow cross-origin resource sharing
+    crossOriginResourcePolicy: false,
   })
 );
-
-// ✅ Enable JSON & URL-Encoded Parsing
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-// ✅ CORS Configuration (Handles Frontend Requests)
 app.use(
   cors({
     origin: "https://jupscarwash.onrender.com",
-    // origin: 'http://localhost:4200',
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
-
-// ✅ Global Headers Middleware
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "https://jupscarwash.onrender.com");
-  // res.header("Access-Control-Allow-Origin", "http://localhost:4200");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Content-Type", "application/json");
-  res.header("X-Content-Type-Options", "nosniff");
-  res.header("X-Frame-Options", "DENY");
-  res.header("X-XSS-Protection", "1; mode=block");
-
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
-
   next();
 });
 
-// ✅ Routes
+// ✅ API Routes
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/invoices", require("./routes/invoice"));
-app.use("/api/vehicles", require("./routes/vehicle")); // ✅ Add Vehicle Routes
+app.use("/api/vehicles", require("./routes/vehicle"));
+
+// ✅ Serve Angular Frontend (from dist/frontend/browser)
+const frontendPath = path.join(__dirname, "dist/frontend/browser");
+app.use(express.static(frontendPath));
+
+// ✅ Catch-all route for Angular client-side routing
+app.get("*", (req, res) => {
+  res.sendFile(path.join(frontendPath, "index.html"));
+});
 
 module.exports = app;
