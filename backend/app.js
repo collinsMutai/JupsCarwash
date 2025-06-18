@@ -24,8 +24,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // ✅ CORS Configuration (Handles Frontend Requests)
 app.use(
   cors({
-    origin: "https://jupscarwash.onrender.com",
-    // origin: 'http://localhost:4200',
+    // origin: "https://jupscarwash.onrender.com",
+    origin: 'http://localhost:4200',
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -34,8 +34,8 @@ app.use(
 
 // ✅ Global Headers Middleware
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://jupscarwash.onrender.com");
-  // res.header("Access-Control-Allow-Origin", "http://localhost:4200");
+  // res.header("Access-Control-Allow-Origin", "https://jupscarwash.onrender.com");
+  res.header("Access-Control-Allow-Origin", "http://localhost:4200");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.header("Access-Control-Allow-Credentials", "true");

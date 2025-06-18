@@ -4,7 +4,7 @@ import { HomeComponent } from './pages/home/home.component';
 import { AuthGuard } from './auth.guard';
 import { GenerateInvoiceComponent } from './generate-invoice/generate-invoice.component';
 import { AddVehicleComponent } from './add-vehicle/add-vehicle.component';
-
+import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent, data: { isRegistering: false } }, // Login route
@@ -19,6 +19,8 @@ export const routes: Routes = [
     path: 'create-vehicle',
     component: AddVehicleComponent,
     canActivate: [AuthGuard],
-  }, 
+  },
+  { path: 'reset-password', component: ResetPasswordComponent },
+
   { path: '**', redirectTo: 'login' },
 ];
