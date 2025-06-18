@@ -15,10 +15,20 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// ✅ Check SMTP connection
+transporter.verify((err, success) => {
+  if (err) {
+    console.error("❌ SMTP connection failed:", err.message);
+  } else {
+    console.log("✅ SMTP transporter is ready.");
+  }
+});
+
 // REGISTER
 router.post("/register", async (req, res) => {
   const { username, email, password, role, name } = req.body;
   try {
+    console.log("🔧 Register request:", req.body);
     const user = new User({ username, email, password, role, name });
     await user.save();
 
@@ -30,15 +40,16 @@ router.post("/register", async (req, res) => {
 
     res.status(201).send({ user, token });
   } catch (e) {
-    console.error(e);
+    console.error("❌ Registration error:", e.message);
     res.status(400).send({ error: "Registration failed" });
   }
 });
 
-// LOGIN (by username)
+// LOGIN
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
   try {
+    console.log("🔐 Login attempt for:", username);
     const user = await User.findOne({ username });
     if (!user) return res.status(404).send({ error: "User not found" });
 
@@ -53,7 +64,7 @@ router.post("/login", async (req, res) => {
 
     res.send({ user, token });
   } catch (e) {
-    console.error(e);
+    console.error("❌ Login error:", e.message);
     res.status(400).send({ error: "Login failed" });
   }
 });
@@ -62,15 +73,21 @@ router.post("/login", async (req, res) => {
 router.post("/request-password-reset", async (req, res) => {
   const { email } = req.body;
   try {
+    console.log("🔁 Password reset requested for:", email);
+
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).send({ error: "User not found" });
+    if (!user) {
+      console.warn("⚠️ No user found with email:", email);
+      return res.status(404).send({ error: "User not found" });
+    }
 
     const token = crypto.randomBytes(32).toString("hex");
     user.resetToken = token;
-    user.resetTokenExpiration = Date.now() + 3600000; // 1 hour
+    user.resetTokenExpiration = Date.now() + 3600000;
     await user.save();
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    console.log("🔗 Reset link generated:", resetLink);
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
@@ -83,10 +100,13 @@ router.post("/request-password-reset", async (req, res) => {
       `,
     });
 
+    console.log("✅ Reset email sent to:", user.email);
     res.send({ message: "Password reset email sent" });
   } catch (e) {
-    console.error(e);
-    res.status(500).send({ error: "Failed to send reset email" });
+    console.error("❌ Error in /request-password-reset:", e);
+    res
+      .status(500)
+      .send({ error: "Failed to send reset email", details: e.message });
   }
 });
 
@@ -94,32 +114,39 @@ router.post("/request-password-reset", async (req, res) => {
 router.post("/reset-password", async (req, res) => {
   const { token, newPassword } = req.body;
   try {
+    console.log("🔄 Resetting password with token:", token);
     const user = await User.findOne({
       resetToken: token,
       resetTokenExpiration: { $gt: Date.now() },
     });
 
-    if (!user)
+    if (!user) {
+      console.warn("⚠️ Invalid or expired reset token");
       return res.status(400).send({ error: "Invalid or expired token" });
+    }
 
     user.password = newPassword;
     user.resetToken = undefined;
     user.resetTokenExpiration = undefined;
     await user.save();
 
+    console.log("✅ Password reset successful for user:", user.email);
     res.send({ message: "Password reset successful" });
   } catch (e) {
-    console.error(e);
+    console.error("❌ Password reset error:", e.message);
     res.status(500).send({ error: "Password reset failed" });
   }
 });
 
-// CHANGE PASSWORD (with JWT)
+// CHANGE PASSWORD (JWT)
 router.post("/change-password", async (req, res) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
   const { currentPassword, newPassword } = req.body;
 
-  if (!token) return res.status(401).send({ error: "Authentication required" });
+  if (!token) {
+    console.warn("⚠️ Missing auth token");
+    return res.status(401).send({ error: "Authentication required" });
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -133,9 +160,10 @@ router.post("/change-password", async (req, res) => {
     user.password = newPassword;
     await user.save();
 
+    console.log("✅ Password changed for user:", user.username);
     res.send({ message: "Password changed successfully" });
   } catch (error) {
-    console.error(error);
+    console.error("❌ Password change error:", error.message);
     res.status(500).send({ error: "Something went wrong" });
   }
 });
