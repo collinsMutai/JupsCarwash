@@ -15,12 +15,10 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// ✅ Check SMTP connection
-transporter.verify((err, success) => {
+// Verify SMTP (useful for debugging in dev/deploy)
+transporter.verify((err) => {
   if (err) {
-    console.error("❌ SMTP connection failed:", err.message);
-  } else {
-    console.log("✅ SMTP transporter is ready.");
+    console.error("SMTP connection failed:", err.message);
   }
 });
 
@@ -28,7 +26,6 @@ transporter.verify((err, success) => {
 router.post("/register", async (req, res) => {
   const { username, email, password, role, name } = req.body;
   try {
-    console.log("🔧 Register request:", req.body);
     const user = new User({ username, email, password, role, name });
     await user.save();
 
@@ -39,8 +36,7 @@ router.post("/register", async (req, res) => {
     );
 
     res.status(201).send({ user, token });
-  } catch (e) {
-    console.error("❌ Registration error:", e.message);
+  } catch {
     res.status(400).send({ error: "Registration failed" });
   }
 });
@@ -49,7 +45,6 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
   try {
-    console.log("🔐 Login attempt for:", username);
     const user = await User.findOne({ username });
     if (!user) return res.status(404).send({ error: "User not found" });
 
@@ -63,8 +58,7 @@ router.post("/login", async (req, res) => {
     );
 
     res.send({ user, token });
-  } catch (e) {
-    console.error("❌ Login error:", e.message);
+  } catch {
     res.status(400).send({ error: "Login failed" });
   }
 });
@@ -73,13 +67,8 @@ router.post("/login", async (req, res) => {
 router.post("/request-password-reset", async (req, res) => {
   const { email } = req.body;
   try {
-    console.log("🔁 Password reset requested for:", email);
-
     const user = await User.findOne({ email });
-    if (!user) {
-      console.warn("⚠️ No user found with email:", email);
-      return res.status(404).send({ error: "User not found" });
-    }
+    if (!user) return res.status(404).send({ error: "User not found" });
 
     const token = crypto.randomBytes(32).toString("hex");
     user.resetToken = token;
@@ -87,10 +76,6 @@ router.post("/request-password-reset", async (req, res) => {
     await user.save();
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-    console.log("🔗 Reset link generated:", resetLink);
-
-    console.log("📧 EMAIL_USER:", process.env.EMAIL_USER);
-    console.log("📧 EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
@@ -103,10 +88,8 @@ router.post("/request-password-reset", async (req, res) => {
       `,
     });
 
-    console.log("✅ Reset email sent to:", user.email);
     res.send({ message: "Password reset email sent" });
   } catch (e) {
-    console.error("❌ Error in /request-password-reset:", e);
     res
       .status(500)
       .send({ error: "Failed to send reset email", details: e.message });
@@ -116,7 +99,6 @@ router.post("/request-password-reset", async (req, res) => {
 // RESET PASSWORD
 router.post("/reset-password", (req, res) => {
   const { token, newPassword } = req.body;
-  console.log("🔄 Resetting password with token:", token);
 
   User.findOne({
     resetToken: token,
@@ -124,7 +106,6 @@ router.post("/reset-password", (req, res) => {
   })
     .then((user) => {
       if (!user) {
-        console.warn("⚠️ Invalid or expired reset token");
         return res.status(400).send({ error: "Invalid or expired token" });
       }
 
@@ -133,34 +114,22 @@ router.post("/reset-password", (req, res) => {
       user.resetTokenExpiration = undefined;
 
       return user.save().then(() => {
-        console.log("✅ Password reset successful for user:", user.email);
-
-        // ✅ Send success response immediately
         res.send({ message: "Password reset successful" });
 
-        // ✅ Fire-and-forget confirmation email
-        return transporter
-          .sendMail({
-            from: process.env.EMAIL_USER,
-            to: user.email,
-            subject: "Your Password Has Been Reset",
-            html: `
+        // Send confirmation email
+        return transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: user.email,
+          subject: "Your Password Has Been Reset",
+          html: `
             <p>Hello ${user.username},</p>
             <p>Your password has been successfully reset.</p>
             <p>If you didn't do this, please contact support immediately.</p>
           `,
-          })
-          .then(() => console.log("📧 Confirmation email sent to:", user.email))
-          .catch((emailErr) =>
-            console.error(
-              "❌ Failed to send confirmation email:",
-              emailErr.message
-            )
-          );
+        });
       });
     })
-    .catch((err) => {
-      console.error("❌ Error in /reset-password:", err.message);
+    .catch(() => {
       res.status(500).send({ error: "Password reset failed" });
     });
 });
@@ -170,10 +139,7 @@ router.post("/change-password", async (req, res) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
   const { currentPassword, newPassword } = req.body;
 
-  if (!token) {
-    console.warn("⚠️ Missing auth token");
-    return res.status(401).send({ error: "Authentication required" });
-  }
+  if (!token) return res.status(401).send({ error: "Authentication required" });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -187,10 +153,8 @@ router.post("/change-password", async (req, res) => {
     user.password = newPassword;
     await user.save();
 
-    console.log("✅ Password changed for user:", user.username);
     res.send({ message: "Password changed successfully" });
-  } catch (error) {
-    console.error("❌ Password change error:", error.message);
+  } catch {
     res.status(500).send({ error: "Something went wrong" });
   }
 });
