@@ -130,6 +130,7 @@ export class HomeComponent {
 
   logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('role');
     this.router.navigate(['/login']);
   }
 
