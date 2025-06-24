@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../../services/api.service';
+import { FormsModule } from '@angular/forms';
 
 interface InvoiceItem {
   vehicleRegNumber: string;
@@ -26,7 +27,7 @@ interface Invoice {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })
@@ -36,6 +37,8 @@ export class HomeComponent {
   isAdmin = false;
   currentPage = 1;
   pageSize = 10;
+  searchTerm: string = '';
+  filteredInvoices: Invoice[] = [];
 
   private apiService = inject(ApiService);
   private router = inject(Router);
@@ -59,6 +62,7 @@ export class HomeComponent {
           });
           return invoice;
         });
+        this.filteredInvoices = [...this.invoices];
         this.updatePaginatedInvoices();
       },
       error: (err) => console.error(err),
@@ -68,7 +72,7 @@ export class HomeComponent {
   updatePaginatedInvoices() {
     const start = (this.currentPage - 1) * this.pageSize;
     const end = start + this.pageSize;
-    this.paginatedInvoices = this.invoices.slice(start, end);
+    this.paginatedInvoices = this.filteredInvoices.slice(start, end);
   }
 
   goToPage(page: number) {
@@ -149,5 +153,20 @@ export class HomeComponent {
         error: (err) => console.error('Error deleting invoice:', err),
       });
     }
+  }
+
+  filterInvoices() {
+    const term = this.searchTerm.toLowerCase().trim();
+
+    this.filteredInvoices = this.invoices.filter((invoice) => {
+      return (
+        invoice.invoiceNumber.toLowerCase().includes(term) ||
+        invoice.date.toLowerCase().includes(term) ||
+        invoice.totalAmount.toString().includes(term)
+      );
+    });
+
+    this.currentPage = 1;
+    this.updatePaginatedInvoices();
   }
 }
