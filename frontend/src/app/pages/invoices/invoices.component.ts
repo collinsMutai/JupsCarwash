@@ -1,9 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
-import { ApiService } from '../../services/api.service';
 import { FormsModule } from '@angular/forms';
-import { InvoicesComponent } from "../invoices/invoices.component";
+import { ApiService } from '../../services/api.service';
 
 interface InvoiceItem {
   vehicleRegNumber: string;
@@ -26,23 +24,21 @@ interface Invoice {
 }
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-invoices',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, InvoicesComponent],
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css'],
+  imports: [CommonModule, FormsModule],
+  templateUrl: './invoices.component.html',
 })
-export class HomeComponent {
+export class InvoicesComponent {
   invoices: Invoice[] = [];
   paginatedInvoices: Invoice[] = [];
-  isAdmin = false;
   currentPage = 1;
   pageSize = 10;
   searchTerm: string = '';
   filteredInvoices: Invoice[] = [];
+  isAdmin = false;
 
   private apiService = inject(ApiService);
-  private router = inject(Router);
 
   ngOnInit() {
     const token = localStorage.getItem('token');
@@ -83,7 +79,7 @@ export class HomeComponent {
 
   get totalPages(): number[] {
     return Array.from(
-      { length: Math.ceil(this.invoices.length / this.pageSize) },
+      { length: Math.ceil(this.filteredInvoices.length / this.pageSize) },
       (_, i) => i + 1
     );
   }
@@ -127,16 +123,6 @@ export class HomeComponent {
       },
       error: (err) => console.error('Print error:', err),
     });
-  }
-
-  goToGenerateInvoice() {
-    this.router.navigate(['/generate-invoice']);
-  }
-
-  logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    this.router.navigate(['/login']);
   }
 
   deleteInvoice(invoice: Invoice) {
