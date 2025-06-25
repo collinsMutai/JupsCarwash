@@ -1,12 +1,12 @@
 import { Component, inject } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterModule, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-layout',
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.css'],
   standalone: true,
-  imports: [RouterOutlet]
+  imports: [RouterOutlet, RouterModule],
 })
 export class LayoutComponent {
   isAdmin = false;
@@ -28,6 +28,10 @@ export class LayoutComponent {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     this.router.navigate(['/login']);
+  }
+
+  goToDashboard() {
+    this.router.navigateByUrl('/dashboard');
   }
 
   goToGenerateInvoice() {

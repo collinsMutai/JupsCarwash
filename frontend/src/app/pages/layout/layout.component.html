@@ -6,8 +6,8 @@
       <p class="tagline">We know Dirt!</p>
     </div>
     <ul>
-      <li>
-        <a routerLink="/dashboard" routerLinkActive="active">
+      <li (click)="goToDashboard()">
+        <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"

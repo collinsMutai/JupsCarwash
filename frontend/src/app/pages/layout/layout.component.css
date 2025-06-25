@@ -55,12 +55,13 @@
   
 
 .sidebar a:hover {
-  background-color: #1a1f2a !important;
+  background-color: #2a2f3a !important;
 }
 
 .sidebar a.active {
   font-weight: bold;
-  text-decoration: underline;
+  background-color: #1a1f2a !important;
+  /* text-decoration: underline; */
 }
 
 .menu-icon {
