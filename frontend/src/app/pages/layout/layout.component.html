@@ -30,7 +30,7 @@
         </a>
       </li>
 
-      <li (click)="goToCreateVehicle()">
+      <li *ngIf="isAdmin"  (click)="goToCreateVehicle()">
         <a routerLink="/create-vehicle" routerLinkActive="active">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -53,7 +53,7 @@
           ><span>Add Vehicle</span></a
         >
       </li>
-      <li (click)="goToGenerateInvoice()">
+      <li *ngIf="isAdmin"  (click)="goToGenerateInvoice()">
         <a routerLink="/generate-invoice" routerLinkActive="active">
           <svg
             xmlns="http://www.w3.org/2000/svg"
