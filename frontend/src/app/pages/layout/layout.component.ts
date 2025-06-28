@@ -11,6 +11,7 @@ import { Router, RouterModule, RouterOutlet } from '@angular/router';
 })
 export class LayoutComponent {
   isAdmin = false;
+  isSidebarCollapsed = false;
   private router = inject(Router);
 
   ngOnInit() {
@@ -23,6 +24,11 @@ export class LayoutComponent {
         console.error('Invalid token:', error);
       }
     }
+    this.isSidebarCollapsed = window.innerWidth <= 768;
+  }
+
+  toggleSidebar() {
+    this.isSidebarCollapsed = !this.isSidebarCollapsed;
   }
 
   logout() {

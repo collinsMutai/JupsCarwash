@@ -1,13 +1,53 @@
-<div class="layout-container">
+<div class="layout-container" [class.sidebar-collapsed]="isSidebarCollapsed">
   <!-- Sidebar -->
-  <nav class="sidebar">
+  <nav class="sidebar" [class.collapsed]="isSidebarCollapsed">
     <div class="sidebar-header">
-      <h3>Jups Carwash</h3>
+      <button class="sidebar-toggle" (click)="toggleSidebar()">
+        <svg
+          *ngIf="!isSidebarCollapsed"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="icon icon-tabler icons-tabler-outline icon-tabler-chevrons-left"
+        >
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <path d="M11 7l-5 5l5 5" />
+          <path d="M17 7l-5 5l5 5" />
+        </svg>
+        <svg
+          *ngIf="isSidebarCollapsed"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="icon icon-tabler icons-tabler-outline icon-tabler-chevrons-right"
+        >
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <path d="M7 7l5 5l-5 5" />
+          <path d="M13 7l5 5l-5 5" />
+        </svg>
+      </button>
+      <h3>H&C Carwash</h3>
       <p class="tagline">We know Dirt!</p>
     </div>
     <ul>
       <li (click)="goToDashboard()">
-        <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
@@ -30,7 +70,7 @@
         </a>
       </li>
 
-      <li *ngIf="isAdmin"  (click)="goToCreateVehicle()">
+      <li *ngIf="isAdmin" (click)="goToCreateVehicle()">
         <a routerLink="/create-vehicle" routerLinkActive="active">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -53,7 +93,7 @@
           ><span>Add Vehicle</span></a
         >
       </li>
-      <li *ngIf="isAdmin"  (click)="goToGenerateInvoice()">
+      <li *ngIf="isAdmin" (click)="goToGenerateInvoice()">
         <a routerLink="/generate-invoice" routerLinkActive="active">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -122,7 +162,7 @@
           <path d="M9 12h12l-3 -3" />
           <path d="M18 15l3 -3" />
         </svg>
-        Logout
+        <span class="logout-text">Logout</span>
       </button>
     </div>
   </nav>

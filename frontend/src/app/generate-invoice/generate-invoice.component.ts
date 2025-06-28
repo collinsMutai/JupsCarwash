@@ -77,7 +77,7 @@ export class GenerateInvoiceComponent implements OnInit {
       .subscribe({
         next: (vehicles) => {
           this.vehicles = vehicles; // Store the vehicle list in the vehicles array
-          console.log('vehicles', this.vehicles);
+          // console.log('vehicles', this.vehicles);
           
         },
         error: (err) => {

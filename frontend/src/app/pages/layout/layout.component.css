@@ -1,8 +1,10 @@
 .layout-container {
   display: flex;
   height: 100vh;
+  transition: all 0.3s ease;
 }
 
+/* Sidebar */
 .sidebar {
   position: relative;
   width: 220px;
@@ -13,13 +15,14 @@
   border-top-right-radius: 12px;
   border-bottom-right-radius: 12px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  transition: width 0.3s ease, transform 0.3s ease;
+  z-index: 1000;
 }
 
 .sidebar-header {
-    text-align: center;
-    margin-bottom: 1.5rem; /* spacing below header */
-  }
-  
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
 
 .sidebar h3 {
   margin-bottom: 1rem;
@@ -36,7 +39,7 @@
   list-style: none;
   padding-left: 0;
   flex-grow: 1;
-  overflow-y: auto; /* Allows scrolling if the list is too long */
+  overflow-y: auto;
 }
 
 .sidebar li {
@@ -44,15 +47,14 @@
 }
 
 .sidebar a {
-    color: white;
-    text-decoration: none;
-    display: flex; /* enables icon and text alignment */
-    align-items: center;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-  }
-  
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
 
 .sidebar a:hover {
   background-color: #2a2f3a !important;
@@ -61,15 +63,16 @@
 .sidebar a.active {
   font-weight: bold;
   background-color: #1a1f2a !important;
-  /* text-decoration: underline; */
 }
 
+/* Icons */
 .menu-icon {
-    margin-right: 8px;
-    vertical-align: middle;
-  }
-  
+  margin-right: 8px;
+  vertical-align: middle;
+  transition: width 0.3s ease, height 0.3s ease;
+}
 
+/* Sidebar footer */
 .sidebar-footer {
   position: absolute;
   bottom: 1rem;
@@ -83,15 +86,15 @@
   gap: 0.5rem;
 }
 
+/* Avatar */
 .user-avatar {
   width: 30px;
   height: 30px;
-  border-radius: 50%;
-  /* border: 2px solid white; */
-  color: white; /* SVG stroke color */
+  color: white;
   display: block;
 }
 
+/* Logout */
 .logout-btn {
   background: none;
   border: none;
@@ -112,13 +115,137 @@
   background-color: #1a1f2a;
 }
 
-.material-icons {
-  font-size: 20px;
+.sidebar.collapsed .logout-text {
+  display: none;
 }
 
+/* Main content */
 .main-content {
   flex: 1;
   padding: 2rem;
   background-color: #f8f9fa;
   overflow-y: auto;
+  transition: padding-left 0.3s ease;
+}
+
+/* Toggle button */
+.sidebar-toggle {
+  background-color: transparent;
+  color: white;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.3rem;
+  margin-bottom: 0.5rem;
+  align-self: flex-start;
+  display: block;
+  z-index: 1100;
+}
+
+/* Collapsed Sidebar */
+.layout-container.sidebar-collapsed .sidebar {
+  width: 60px;
+  padding: 1rem 0.5rem;
+}
+
+.sidebar.collapsed {
+  width: 60px;
+  overflow: hidden;
+}
+
+.sidebar.collapsed .sidebar-header h3,
+.sidebar.collapsed .tagline,
+.sidebar.collapsed span,
+.sidebar.collapsed .logout-text {
+  display: none;
+}
+
+/* Icon alignment and sizing in collapsed view */
+.sidebar.collapsed ul {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-left: 0;
+}
+
+.sidebar.collapsed li {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.sidebar.collapsed a {
+  justify-content: center;
+  padding: 0.75rem 0;
+}
+
+.sidebar.collapsed .menu-icon {
+  margin-right: 0;
+  width: 30px;
+  height: 30px;
+  font-size: 30px;
+  min-width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar.collapsed .menu-icon svg {
+  width: 30px;
+  height: 30px;
+  stroke-width: 2;
+}
+
+/* Adjust main content for collapsed */
+.layout-container.sidebar-collapsed .main-content {
+  padding-left: 60px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .layout-container {
+    flex-direction: row;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    transition: width 0.3s ease, transform 0.3s ease;
+  }
+
+  .sidebar.collapsed {
+    width: 60px;
+    transform: none;
+  }
+
+  .sidebar.sidebar-hidden {
+    transform: translateX(-100%);
+  }
+
+  .main-content {
+    margin-left: 220px;
+    padding: 1rem;
+    transition: margin-left 0.3s ease;
+  }
+
+  .layout-container.sidebar-collapsed .main-content {
+    margin-left: 60px;
+  }
+
+  .layout-container.sidebar-hidden .main-content {
+    margin-left: 0;
+  }
+
+  .sidebar .menu-icon,
+  .sidebar.collapsed .menu-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 30px;
+    min-width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }

@@ -1,60 +1,98 @@
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-4">
-      <h2 class="text-center">
-        {{ isResetting ? 'Reset Password' : (isRegistering ? 'Register' : 'Admin Login') }}
-      </h2>
+<div class="login-wrapper">
+  <!-- Title above the card -->
+  <h1 class="app-title text-center mb-4">H&amp;C Carwash</h1>
 
-      <form (submit)="onSubmit(); $event.preventDefault()">
-        <div class="mb-3" *ngIf="!isResetting && !isRegistering">
-          <label class="form-label">Username</label>
-          <input type="text" class="form-control" [(ngModel)]="username" name="username" required />
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm p-4">
+          <h2 class="text-center mb-4">
+            {{ isResetting ? 'Reset Password' : (isRegistering ? 'Register' : 'Login') }}
+          </h2>
+
+          <form (submit)="onSubmit(); $event.preventDefault()">
+            <!-- Username (Login/Register) -->
+            <div class="mb-3" *ngIf="!isResetting">
+              <label class="form-label">Username</label>
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="username"
+                name="username"
+                required
+              />
+            </div>
+
+            <!-- Email (Reset) -->
+            <div class="mb-3" *ngIf="isResetting">
+              <label class="form-label">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                [(ngModel)]="email"
+                name="email"
+                required
+              />
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3" *ngIf="!isResetting">
+              <label class="form-label">Password</label>
+              <input
+                type="password"
+                class="form-control"
+                [(ngModel)]="password"
+                name="password"
+                required
+              />
+            </div>
+
+            <!-- Role (Register) -->
+            <div class="mb-3" *ngIf="isRegistering">
+              <label class="form-label">Role</label>
+              <select
+                class="form-control"
+                [(ngModel)]="role"
+                name="role"
+                required
+              >
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+              {{
+                isResetting
+                  ? 'Send Reset Email'
+                  : isRegistering
+                  ? 'Register'
+                  : 'Login'
+              }}
+            </button>
+          </form>
+
+          <!-- Links -->
+          <div class="text-center mt-3" *ngIf="!isResetting">
+            <a class="btn btn-link" (click)="toggleRegister()">
+              {{
+                isRegistering
+                  ? 'Already have an account? Login'
+                  : "Don't have an account? Register"
+              }}
+            </a>
+            <br />
+            <a class="btn btn-link text-danger" (click)="toggleReset()"
+              >Forgot Password?</a
+            >
+          </div>
+
+          <div class="text-center mt-3" *ngIf="isResetting">
+            <a class="btn btn-link" (click)="toggleReset()"
+              >Back to Login</a
+            >
+          </div>
         </div>
-
-        <div class="mb-3" *ngIf="isResetting">
-          <label class="form-label">Email</label>
-          <input type="email" class="form-control" [(ngModel)]="email" name="email" required />
-        </div>
-
-        <div class="mb-3" *ngIf="isRegistering">
-          <label class="form-label">Username</label>
-          <input type="text" class="form-control" [(ngModel)]="username" name="username" required />
-        </div>
-
-        <div class="mb-3" *ngIf="!isResetting">
-          <label class="form-label">Password</label>
-          <input type="password" class="form-control" [(ngModel)]="password" name="password" required />
-        </div>
-
-        <div class="mb-3" *ngIf="isRegistering">
-          <label class="form-label">Role</label>
-          <select class="form-control" [(ngModel)]="role" name="role" required>
-            <option value="admin">Admin</option>
-            <option value="user">User</option>
-          </select>
-        </div>
-
-        <button type="submit" class="btn btn-primary w-100">
-          {{
-            isResetting
-              ? 'Send Reset Email'
-              : isRegistering
-              ? 'Register'
-              : 'Login'
-          }}
-        </button>
-      </form>
-
-      <div class="text-center mt-3" *ngIf="!isResetting">
-        <a class="btn btn-link" (click)="toggleRegister()">
-          {{ isRegistering ? 'Already have an account? Login' : "Don't have an account? Register" }}
-        </a>
-        <br />
-        <a class="btn btn-link text-danger" (click)="toggleReset()">Forgot Password?</a>
-      </div>
-
-      <div class="text-center mt-3" *ngIf="isResetting">
-        <a class="btn btn-link" (click)="toggleReset()">Back to Login</a>
       </div>
     </div>
   </div>
