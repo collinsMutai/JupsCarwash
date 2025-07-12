@@ -1,41 +1,43 @@
-const mongoose = require("mongoose");
-const weeklySummarySchema = require("../models/WeeklySummary.model"); // import the schema
+const WeeklySummary = require("../models/WeeklySummary.model");
 const { createInvoice } = require("./invoiceService");
-
-// Create a connection to the second MongoDB (jupscarwash)
-const secondDb = mongoose.createConnection(process.env.DB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-// Create the WeeklySummary model from the schema and connection
-const WeeklySummary = secondDb.model("WeeklySummary", weeklySummarySchema);
 
 async function runAutomatedInvoiceJob() {
   // Find weekly summaries not yet invoiced
   const summaries = await WeeklySummary.find({ invoiced: { $ne: true } });
 
   for (const summary of summaries) {
-    for (const service of summary.services) {
-      const items = [
-        {
-          description: service.description,
-          amount: service.totalServiceFee / service.numberOfWashes,
-          quantity: service.numberOfWashes,
-          vehicleRegNumber: service.registration,
-        },
-      ];
+    // Group services by clientName
+    const servicesByClient = summary.services.reduce((acc, service) => {
+      if (!acc[service.clientName]) {
+        acc[service.clientName] = [];
+      }
+      acc[service.clientName].push(service);
+      return acc;
+    }, {});
+
+    // Create one invoice per client
+    for (const clientName of Object.keys(servicesByClient)) {
+      const services = servicesByClient[clientName];
+
+      // Create invoice items array combining all services for this client
+      const items = services.map((service) => ({
+        description: service.description,
+        amount: service.totalServiceFee / service.numberOfWashes,
+        quantity: service.numberOfWashes,
+        vehicleRegNumber: service.registration, // add if your Invoice model requires this
+      }));
 
       try {
         await createInvoice({
-          clientName: service.clientName,
+          clientName,
           items,
           date: summary.weekEnd,
-          createdBy: null, // or admin user id if you have one
+          createdBy: null, // or admin user id if available
         });
+        console.log(`✅ Invoice created for client ${clientName}`);
       } catch (error) {
         console.error(
-          `Failed to create invoice for client ${service.clientName}`,
+          `❌ Failed to create invoice for client ${clientName}`,
           error
         );
       }
