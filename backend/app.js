@@ -80,15 +80,15 @@ cron.schedule(
 // === RUN ONCE FOR TESTING ON APP START ===
 // Uncomment only for development or testing
 
-(async () => {
-  try {
-    console.log("🚀 Running invoice automation on app start (for testing)...");
-    await runAutomatedInvoiceJob();
-    console.log("✅ Test automation complete");
-  } catch (e) {
-    console.error("❌ Error running invoice automation on app start:", e);
-  }
-})();
+// (async () => {
+//   try {
+//     console.log("🚀 Running invoice automation on app start (for testing)...");
+//     await runAutomatedInvoiceJob();
+//     console.log("✅ Test automation complete");
+//   } catch (e) {
+//     console.error("❌ Error running invoice automation on app start:", e);
+//   }
+// })();
 
 
 module.exports = app;
