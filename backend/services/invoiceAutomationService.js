@@ -1,4 +1,4 @@
-const WeeklySummary = require("../models/WeeklySummary");
+const WeeklySummary = require("../models/WeeklySummary.model");
 const { createInvoice } = require("./invoiceService");
 
 async function runAutomatedInvoiceJob() {
