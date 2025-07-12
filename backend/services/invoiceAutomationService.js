@@ -22,6 +22,7 @@ async function runAutomatedInvoiceJob() {
           description: service.description,
           amount: service.totalServiceFee / service.numberOfWashes,
           quantity: service.numberOfWashes,
+          vehicleRegNumber: service.registration,
         },
       ];
 
