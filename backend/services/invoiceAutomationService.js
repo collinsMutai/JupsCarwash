@@ -1,5 +1,15 @@
-const WeeklySummary = require("../models/WeeklySummary.model");
+const mongoose = require("mongoose");
+const weeklySummarySchema = require("../models/WeeklySummary.model"); // import the schema
 const { createInvoice } = require("./invoiceService");
+
+// Create a connection to the second MongoDB (jupscarwash)
+const secondDb = mongoose.createConnection(process.env.SECOND_MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+// Create the WeeklySummary model from the schema and connection
+const WeeklySummary = secondDb.model("WeeklySummary", weeklySummarySchema);
 
 async function runAutomatedInvoiceJob() {
   // Find weekly summaries not yet invoiced
