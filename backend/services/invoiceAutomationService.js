@@ -3,7 +3,7 @@ const weeklySummarySchema = require("../models/WeeklySummary.model"); // import 
 const { createInvoice } = require("./invoiceService");
 
 // Create a connection to the second MongoDB (jupscarwash)
-const secondDb = mongoose.createConnection(process.env.SECOND_MONGO_URI, {
+const secondDb = mongoose.createConnection(process.env.DB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
