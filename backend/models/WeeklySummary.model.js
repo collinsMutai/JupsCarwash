@@ -22,4 +22,5 @@ const weeklySummarySchema = new mongoose.Schema({
   },
 });
 
-module.exports = weeklySummarySchema;
+module.exports = mongoose.model("WeeklySummary", weeklySummarySchema);
+
