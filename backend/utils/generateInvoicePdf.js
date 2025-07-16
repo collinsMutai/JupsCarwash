@@ -62,18 +62,60 @@ function generateInvoicePDF(invoice, res) {
     doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
 
     // ✅ TABLE ROWS (Invoice Items)
-    invoice.items.forEach((item) => {
-      const rowTop = doc.y + 5;
-      doc
-        .fontSize(12)
-        .text(item.vehicleRegNumber, 55, rowTop)
-        .text(item.description, 200, rowTop)
-        .text(item.quantity.toString(), 380, rowTop) // Display quantity
-        .text(`KES ${item.amount.toFixed(2)}`, 460, rowTop)
-        .moveDown();
+invoice.items.forEach((item) => {
+  const startX = 55;
+  const startY = doc.y + 5;
 
-      doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-    });
+  const vehicleRegWidth = 130; // Width of Vehicle Reg # column
+  const descriptionWidth = 160; // Width of Description column
+  const quantityX = 380;
+  const amountX = 460;
+
+  // Save current position
+  const initialY = doc.y;
+
+  // Draw Vehicle Reg # wrapped within vehicleRegWidth
+  doc.fontSize(12).text(item.vehicleRegNumber, startX, startY, {
+    width: vehicleRegWidth,
+  });
+
+  // Measure height of the wrapped Vehicle Reg # text
+  const vehicleRegHeight = doc.heightOfString(item.vehicleRegNumber, {
+    width: vehicleRegWidth,
+  });
+
+  // Draw Description text, aligned to the right of Vehicle Reg # column,
+  // and vertically aligned to startY (same line)
+  doc.text(item.description, startX + vehicleRegWidth + 10, startY, {
+    width: descriptionWidth,
+  });
+
+  // Measure height of the Description text in case it also wraps
+  const descriptionHeight = doc.heightOfString(item.description, {
+    width: descriptionWidth,
+  });
+
+  // Find max height to know how far down to move for next row
+  const rowHeight = Math.max(vehicleRegHeight, descriptionHeight);
+
+  // Draw Quantity and Amount vertically aligned with Description text
+  doc.text(item.quantity.toString(), quantityX, startY, {
+    width: 40,
+    align: "right",
+  });
+
+  doc.text(`KES ${item.amount.toFixed(2)}`, amountX, startY, {
+    width: 80,
+    align: "right",
+  });
+
+  // Move doc.y to the end of the tallest cell in the row plus a little padding
+  doc.y = startY + rowHeight + 5;
+
+  // Draw a horizontal line to separate rows
+  doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+});
+
 
     // ✅ TOTAL AMOUNT
     doc

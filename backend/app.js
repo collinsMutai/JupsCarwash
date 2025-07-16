@@ -59,23 +59,23 @@ app.use("/api/vehicles", require("./routes/vehicle"));
 
 // === CRON JOB SETUP ===
 // 🕙 Runs every Monday at 10:10 PM Africa/Nairobi time
-cron.schedule(
-  "10 22 * * 1", // Monday 10:10 PM
-  async () => {
-    console.log(
-      "⏰ Running automated invoice job at 10:10 PM (after summaries)"
-    );
-    try {
-      await runAutomatedInvoiceJob();
-      console.log("✅ Automated invoices generated successfully");
-    } catch (err) {
-      console.error("❌ Error in automated invoice job:", err);
-    }
-  },
-  {
-    timezone: "Africa/Nairobi", // Match summary cron timezone
-  }
-);
+// cron.schedule(
+//   "10 22 * * 1", // Monday 10:10 PM
+//   async () => {
+//     console.log(
+//       "⏰ Running automated invoice job at 10:10 PM (after summaries)"
+//     );
+//     try {
+//       await runAutomatedInvoiceJob();
+//       console.log("✅ Automated invoices generated successfully");
+//     } catch (err) {
+//       console.error("❌ Error in automated invoice job:", err);
+//     }
+//   },
+//   {
+//     timezone: "Africa/Nairobi", // Match summary cron timezone
+//   }
+// );
 
 // === RUN ONCE FOR TESTING ON APP START ===
 // Uncomment only for development or testing
