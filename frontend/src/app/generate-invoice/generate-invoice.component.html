@@ -11,6 +11,7 @@
         readonly
       />
     </div>
+
     <div class="mb-3">
       <label class="form-label">Client Name</label>
       <input
@@ -21,6 +22,7 @@
         required
       />
     </div>
+
     <div class="mb-3">
       <label class="form-label">Invoice Date</label>
       <input
@@ -35,6 +37,7 @@
     <h4>Vehicle Details</h4>
     <div *ngFor="let item of items; let i = index" class="card p-3 mb-3">
       <div class="row">
+        <!-- Vehicle Dropdown -->
         <div class="col-md-3">
           <label class="form-label">Vehicle</label>
           <select
@@ -49,6 +52,40 @@
             </option>
           </select>
         </div>
+
+        <!-- Multiple Vehicle Dates -->
+        <div class="col-md-6">
+          <label class="form-label">Vehicle Dates</label>
+          <div
+            *ngFor="let date of item.vehicleDates; let j = index"
+            class="input-group mb-1"
+          >
+            <input
+              type="date"
+              class="form-control"
+              [(ngModel)]="item.vehicleDates[j]"
+              name="vehicleDate{{ i }}_{{ j }}"
+              required
+            />
+            <button
+              type="button"
+              class="btn btn-outline-danger"
+              (click)="item.vehicleDates.splice(j, 1)"
+              *ngIf="item.vehicleDates.length > 1"
+            >
+              ×
+            </button>
+          </div>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="item.vehicleDates.push('')"
+          >
+            + Add Date
+          </button>
+        </div>
+
+        <!-- Description -->
         <div class="col-md-3">
           <label class="form-label">Description</label>
           <input
@@ -59,6 +96,8 @@
             required
           />
         </div>
+
+        <!-- Quantity -->
         <div class="col-md-2">
           <label class="form-label">Quantity</label>
           <input
@@ -70,6 +109,8 @@
             min="1"
           />
         </div>
+
+        <!-- Amount -->
         <div class="col-md-2">
           <label class="form-label">Amount (KES)</label>
           <input
@@ -81,6 +122,8 @@
             (input)="calculateTotal()"
           />
         </div>
+
+        <!-- Remove Item Button -->
         <div class="col-md-1 d-flex align-items-end">
           <button
             type="button"

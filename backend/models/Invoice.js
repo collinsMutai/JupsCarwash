@@ -7,6 +7,7 @@ const InvoiceSchema = new mongoose.Schema({
   items: [
     {
       vehicleRegNumber: { type: String, required: true }, // Vehicle Registration
+      vehicleDates: [{ type: Date, required: true }],
       description: { type: String, required: true }, // Service/Repair Description
       amount: { type: Number, required: true }, // Charge for this vehicle
       quantity: { type: Number, required: true, min: 1 }, // Quantity of the item/service

@@ -12,7 +12,7 @@ function generateInvoicePDF(invoice, res) {
 
     doc.pipe(res);
 
-    // ✅ HEADER
+    // Header
     doc
       .fontSize(22)
       .font("Helvetica-Bold")
@@ -33,7 +33,7 @@ function generateInvoicePDF(invoice, res) {
       .text("INVOICE", 50, 50, { align: "right" })
       .moveDown(2);
 
-    // ✅ CUSTOMER DETAILS
+    // Customer Info
     doc
       .fontSize(12)
       .fillColor("black")
@@ -44,7 +44,7 @@ function generateInvoicePDF(invoice, res) {
       .text(`Date: ${new Date(invoice.date).toLocaleDateString()}`)
       .moveDown(2);
 
-    // ✅ TABLE HEADER
+    // Table Header
     const tableTop = doc.y;
     doc
       .fillColor("#333")
@@ -54,70 +54,67 @@ function generateInvoicePDF(invoice, res) {
       .fontSize(12)
       .text("Vehicle Reg #", 55, tableTop + 5)
       .text("Description", 200, tableTop + 5)
-      .text("Quantity", 380, tableTop + 5) // Add the Quantity column header
+      .text("Quantity", 380, tableTop + 5)
       .text("Amount (KES)", 460, tableTop + 5)
       .fillColor("black")
       .moveDown();
 
     doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
 
-    // ✅ TABLE ROWS (Invoice Items)
-invoice.items.forEach((item) => {
-  const startX = 55;
-  const startY = doc.y + 5;
+    // Table Rows
+    invoice.items.forEach((item) => {
+      const startX = 55;
+      const startY = doc.y + 5;
 
-  const vehicleRegWidth = 130; // Width of Vehicle Reg # column
-  const descriptionWidth = 160; // Width of Description column
-  const quantityX = 380;
-  const amountX = 460;
+      const vehicleRegWidth = 130;
+      const descriptionWidth = 160;
+      const quantityX = 380;
+      const amountX = 460;
 
-  // Save current position
-  const initialY = doc.y;
+      const sortedDates = Array.isArray(item.vehicleDates)
+        ? item.vehicleDates
+            .map((d) => new Date(d))
+            .sort((a, b) => b - a)
+            .map((d) => d.toLocaleDateString())
+            .join(", ")
+        : "";
 
-  // Draw Vehicle Reg # wrapped within vehicleRegWidth
-  doc.fontSize(12).text(item.vehicleRegNumber, startX, startY, {
-    width: vehicleRegWidth,
-  });
+      const vehicleInfo = `${item.vehicleRegNumber}\n${sortedDates}`;
 
-  // Measure height of the wrapped Vehicle Reg # text
-  const vehicleRegHeight = doc.heightOfString(item.vehicleRegNumber, {
-    width: vehicleRegWidth,
-  });
+      doc.fontSize(12).text(vehicleInfo, startX, startY, {
+        width: vehicleRegWidth,
+      });
 
-  // Draw Description text, aligned to the right of Vehicle Reg # column,
-  // and vertically aligned to startY (same line)
-  doc.text(item.description, startX + vehicleRegWidth + 10, startY, {
-    width: descriptionWidth,
-  });
+      const vehicleInfoHeight = doc.heightOfString(vehicleInfo, {
+        width: vehicleRegWidth,
+      });
 
-  // Measure height of the Description text in case it also wraps
-  const descriptionHeight = doc.heightOfString(item.description, {
-    width: descriptionWidth,
-  });
+      doc.text(item.description, startX + vehicleRegWidth + 10, startY, {
+        width: descriptionWidth,
+      });
 
-  // Find max height to know how far down to move for next row
-  const rowHeight = Math.max(vehicleRegHeight, descriptionHeight);
+      const descriptionHeight = doc.heightOfString(item.description, {
+        width: descriptionWidth,
+      });
 
-  // Draw Quantity and Amount vertically aligned with Description text
-  doc.text(item.quantity.toString(), quantityX, startY, {
-    width: 40,
-    align: "right",
-  });
+      const rowHeight = Math.max(vehicleInfoHeight, descriptionHeight);
 
-  doc.text(`KES ${item.amount.toFixed(2)}`, amountX, startY, {
-    width: 80,
-    align: "right",
-  });
+      doc.text(item.quantity.toString(), quantityX, startY, {
+        width: 40,
+        align: "right",
+      });
 
-  // Move doc.y to the end of the tallest cell in the row plus a little padding
-  doc.y = startY + rowHeight + 5;
+      doc.text(`KES ${item.amount.toFixed(2)}`, amountX, startY, {
+        width: 80,
+        align: "right",
+      });
 
-  // Draw a horizontal line to separate rows
-  doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-});
+      doc.y = startY + rowHeight + 5;
 
+      doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+    });
 
-    // ✅ TOTAL AMOUNT
+    // Total
     doc
       .moveDown(2)
       .fontSize(12)
@@ -125,7 +122,7 @@ invoice.items.forEach((item) => {
       .text("Total:", 400, doc.y, { continued: true })
       .text(`KES ${invoice.totalAmount.toFixed(2)}`);
 
-    // ✅ FOOTER
+    // Footer
     doc
       .moveDown(3)
       .fontSize(12)
@@ -142,7 +139,6 @@ invoice.items.forEach((item) => {
       .font("Helvetica-Bold")
       .text("Thank You for Your Business!", { align: "center" });
 
-    // ✅ Finalize PDF
     doc.end();
   } catch (error) {
     console.error("❌ Error generating PDF:", error);

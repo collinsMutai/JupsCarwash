@@ -18,21 +18,23 @@ export class GenerateInvoiceComponent implements OnInit {
   date: string = '';
   items: any[] = [
     {
-      vehicleRegNumber: '', // Add this field to store vehicle registration number
+      vehicleRegNumber: '',
+      vehicleDates: [''], // ✅ multi-date support
       description: '',
       amount: null,
       quantity: 1,
       vehicleId: null,
     },
   ];
+
   totalAmount: number = 0;
-  vehicles: any[] = []; // To hold the list of vehicles
+  vehicles: any[] = [];
 
   constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit() {
     this.fetchNextInvoiceNumber();
-    this.fetchVehicles(); // Fetch the list of vehicles on component load
+    this.fetchVehicles();
   }
 
   fetchNextInvoiceNumber() {
@@ -61,7 +63,6 @@ export class GenerateInvoiceComponent implements OnInit {
       });
   }
 
-  // Fetch the list of vehicles from the backend
   fetchVehicles() {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -76,9 +77,7 @@ export class GenerateInvoiceComponent implements OnInit {
       })
       .subscribe({
         next: (vehicles) => {
-          this.vehicles = vehicles; // Store the vehicle list in the vehicles array
-          // console.log('vehicles', this.vehicles);
-          
+          this.vehicles = vehicles;
         },
         error: (err) => {
           console.error('Error fetching vehicles:', err);
@@ -87,23 +86,23 @@ export class GenerateInvoiceComponent implements OnInit {
       });
   }
 
-  // Method to set the vehicle registration number when a vehicle is selected
   setVehicleRegNumber(item: any) {
     const selectedVehicle = this.vehicles.find(
       (vehicle) => vehicle._id === item.vehicleId
     );
     if (selectedVehicle) {
-      item.vehicleRegNumber = selectedVehicle.vehicleRegNumber; // Set the vehicle registration number
+      item.vehicleRegNumber = selectedVehicle.vehicleRegNumber;
     }
   }
 
   addItem() {
     this.items.push({
-      vehicleRegNumber: '', // Ensure the new item also has this property
+      vehicleRegNumber: '',
+      vehicleDates: [''], // ✅ support multiple dates
       description: '',
       amount: null,
       quantity: 1,
-      vehicleId: null, // Vehicle ID to be selected
+      vehicleId: null,
     });
   }
 
@@ -120,32 +119,34 @@ export class GenerateInvoiceComponent implements OnInit {
 
   generateInvoice() {
     const token = localStorage.getItem('token');
-
     if (!token) {
       alert('Authentication required! Please login.');
       this.router.navigate(['/login']);
       return;
     }
 
-    // Console log all fields before validation
     console.log('Invoice Number:', this.invoiceNumber);
     console.log('Client Name:', this.clientName);
     console.log('Invoice Date:', this.date);
     console.log('Items:', this.items);
 
-    // Validation: Ensure all fields are filled
+    const invalidItem = this.items.find(
+      (item) =>
+        !item.vehicleId ||
+        !item.vehicleRegNumber ||
+        !item.vehicleDates ||
+        !item.vehicleDates.length ||
+        item.vehicleDates.some((d: string) => !d) || // ensure no empty dates
+        !item.description ||
+        item.amount === null ||
+        item.quantity <= 0
+    );
+
     if (
       !this.clientName ||
       !this.date ||
-      !this.items.length ||
-      this.items.some(
-        (item) =>
-          !item.vehicleId || // Vehicle ID should be selected from the dropdown
-          !item.vehicleRegNumber || // Vehicle registration should be filled
-          !item.description || // Description should be filled
-          item.amount === null || // Amount should be filled
-          item.quantity <= 0 // Quantity should be greater than 0
-      )
+      this.items.length === 0 ||
+      invalidItem
     ) {
       alert('Please complete all fields before submitting.');
       return;
@@ -172,7 +173,7 @@ export class GenerateInvoiceComponent implements OnInit {
         withCredentials: true,
       })
       .subscribe({
-        next: (response) => {
+        next: () => {
           alert('Invoice created successfully!');
           this.router.navigate(['/']);
         },

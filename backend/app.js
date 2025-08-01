@@ -4,9 +4,10 @@ const cors = require("cors");
 const helmet = require("helmet");
 const connectDB = require("./config/db");
 const cron = require("node-cron");
+require("dotenv").config();
 const {
   runAutomatedInvoiceJob,
-} = require("./services/invoiceAutomationService"); // ✅ New automation logic
+} = require("./services/invoiceAutomationService");
 
 const app = express();
 
@@ -24,10 +25,19 @@ app.use(
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// ✅ CORS Configuration
+// ✅ Get allowed origins from .env
+const allowedOrigins = process.env.FRONTEND_URLS.split(",");
+
+// ✅ CORS Configuration (dynamic)
 app.use(
   cors({
-    origin: "https://jupscarwash.onrender.com",
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // Allow requests without origin (like Postman)
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -36,7 +46,11 @@ app.use(
 
 // ✅ Global Headers Middleware
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://jupscarwash.onrender.com");
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.header("Access-Control-Allow-Credentials", "true");
@@ -58,13 +72,10 @@ app.use("/api/invoices", require("./routes/invoice"));
 app.use("/api/vehicles", require("./routes/vehicle"));
 
 // === CRON JOB SETUP ===
-// 🕙 Runs every Monday at 10:10 PM Africa/Nairobi time
 // cron.schedule(
-//   "10 22 * * 1", // Monday 10:10 PM
+//   "10 22 * * 1",
 //   async () => {
-//     console.log(
-//       "⏰ Running automated invoice job at 10:10 PM (after summaries)"
-//     );
+//     console.log("⏰ Running automated invoice job at 10:10 PM (after summaries)");
 //     try {
 //       await runAutomatedInvoiceJob();
 //       console.log("✅ Automated invoices generated successfully");
@@ -73,13 +84,11 @@ app.use("/api/vehicles", require("./routes/vehicle"));
 //     }
 //   },
 //   {
-//     timezone: "Africa/Nairobi", // Match summary cron timezone
+//     timezone: "Africa/Nairobi",
 //   }
 // );
 
 // === RUN ONCE FOR TESTING ON APP START ===
-// Uncomment only for development or testing
-
 // (async () => {
 //   try {
 //     console.log("🚀 Running invoice automation on app start (for testing)...");
@@ -89,6 +98,5 @@ app.use("/api/vehicles", require("./routes/vehicle"));
 //     console.error("❌ Error running invoice automation on app start:", e);
 //   }
 // })();
-
 
 module.exports = app;
