@@ -9,9 +9,13 @@ async function createInvoice({ clientName, items, date, createdBy }) {
     throw new Error("Invoice must have at least one item");
   }
 
-  // Calculate total amount
+  // Calculate total amount considering number of wash dates per item
   const totalAmount = items.reduce((sum, item) => {
-    return sum + item.amount * item.quantity;
+    const washesCount =
+      Array.isArray(item.vehicleDates) && item.vehicleDates.length > 0
+        ? item.vehicleDates.length
+        : 1; // default 1 if no dates
+    return sum + item.amount * item.quantity * washesCount;
   }, 0);
 
   const invoiceDate = date ? new Date(date) : new Date();
@@ -43,5 +47,6 @@ async function createInvoice({ clientName, items, date, createdBy }) {
   await invoice.save();
   return invoice;
 }
+
 
 module.exports = { createInvoice };

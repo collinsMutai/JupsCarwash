@@ -19,10 +19,9 @@ export class GenerateInvoiceComponent implements OnInit {
   items: any[] = [
     {
       vehicleRegNumber: '',
-      vehicleDates: [''], // ✅ multi-date support
+      vehicleDates: [''], // support multiple dates
       description: '',
       amount: null,
-      quantity: 1,
       vehicleId: null,
     },
   ];
@@ -98,10 +97,9 @@ export class GenerateInvoiceComponent implements OnInit {
   addItem() {
     this.items.push({
       vehicleRegNumber: '',
-      vehicleDates: [''], // ✅ support multiple dates
+      vehicleDates: [''],
       description: '',
       amount: null,
-      quantity: 1,
       vehicleId: null,
     });
   }
@@ -111,9 +109,20 @@ export class GenerateInvoiceComponent implements OnInit {
     this.calculateTotal();
   }
 
+  addDate(item: any) {
+    item.vehicleDates.push('');
+    this.calculateTotal();
+  }
+
+  removeDate(item: any, index: number) {
+    item.vehicleDates.splice(index, 1);
+    this.calculateTotal();
+  }
+
   calculateTotal() {
     this.totalAmount = this.items.reduce((sum, item) => {
-      return sum + (item.amount ? item.amount * (item.quantity || 1) : 0);
+      const quantity = item.vehicleDates ? item.vehicleDates.length : 1;
+      return sum + (item.amount ? item.amount * quantity : 0);
     }, 0);
   }
 
@@ -125,21 +134,17 @@ export class GenerateInvoiceComponent implements OnInit {
       return;
     }
 
-    console.log('Invoice Number:', this.invoiceNumber);
-    console.log('Client Name:', this.clientName);
-    console.log('Invoice Date:', this.date);
-    console.log('Items:', this.items);
-
+    // Validation
     const invalidItem = this.items.find(
       (item) =>
         !item.vehicleId ||
         !item.vehicleRegNumber ||
         !item.vehicleDates ||
         !item.vehicleDates.length ||
-        item.vehicleDates.some((d: string) => !d) || // ensure no empty dates
+        item.vehicleDates.some((d: string) => !d) || // no empty dates allowed
         !item.description ||
         item.amount === null ||
-        item.quantity <= 0
+        item.amount < 0
     );
 
     if (
@@ -153,16 +158,24 @@ export class GenerateInvoiceComponent implements OnInit {
     }
 
     const totalAmount = this.items.reduce((sum, item) => {
-      return sum + (item.amount ? item.amount * (item.quantity || 1) : 0);
+      const quantity = item.vehicleDates ? item.vehicleDates.length : 1;
+      return sum + (item.amount ? item.amount * quantity : 0);
     }, 0);
 
-    const invoiceData = {
-      invoiceNumber: this.invoiceNumber,
-      clientName: this.clientName,
-      date: this.date,
-      items: this.items,
-      totalAmount: totalAmount,
-    };
+  const invoiceData = {
+    invoiceNumber: this.invoiceNumber,
+    clientName: this.clientName,
+    date: this.date,
+    items: this.items.map((item) => ({
+      vehicleRegNumber: item.vehicleRegNumber,
+      vehicleDates: item.vehicleDates,
+      description: item.description,
+      amount: item.amount,
+      vehicleId: item.vehicleId,
+      quantity: item.quantity ?? 1, // Add quantity, default to 1 if missing
+    })),
+    totalAmount: totalAmount,
+  };
 
     this.http
       .post(`${environment.baseUrl}/invoices`, invoiceData, {

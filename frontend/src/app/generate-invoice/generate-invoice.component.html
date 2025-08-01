@@ -66,11 +66,12 @@
               [(ngModel)]="item.vehicleDates[j]"
               name="vehicleDate{{ i }}_{{ j }}"
               required
+              (ngModelChange)="calculateTotal()"
             />
             <button
               type="button"
               class="btn btn-outline-danger"
-              (click)="item.vehicleDates.splice(j, 1)"
+              (click)="removeDate(item, j)"
               *ngIf="item.vehicleDates.length > 1"
             >
               ×
@@ -79,7 +80,7 @@
           <button
             type="button"
             class="btn btn-outline-secondary btn-sm"
-            (click)="item.vehicleDates.push('')"
+            (click)="addDate(item)"
           >
             + Add Date
           </button>
@@ -97,16 +98,14 @@
           />
         </div>
 
-        <!-- Quantity -->
+        <!-- Quantity (readonly) -->
         <div class="col-md-2">
           <label class="form-label">Quantity</label>
           <input
             type="number"
             class="form-control"
-            [(ngModel)]="item.quantity"
-            name="quantity{{ i }}"
-            required
-            min="1"
+            [value]="item.vehicleDates.length"
+            readonly
           />
         </div>
 

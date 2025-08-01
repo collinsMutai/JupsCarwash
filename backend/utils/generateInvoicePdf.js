@@ -1,6 +1,11 @@
 const PDFDocument = require("pdfkit");
 
 function generateInvoicePDF(invoice, res) {
+  console.log(
+    "Invoice data received for PDF:",
+    JSON.stringify(invoice, null, 2)
+  );
+
   try {
     const doc = new PDFDocument({ size: "A4", margin: 50 });
 
@@ -71,6 +76,7 @@ function generateInvoicePDF(invoice, res) {
       const quantityX = 380;
       const amountX = 460;
 
+      // Sort and format wash dates
       const sortedDates = Array.isArray(item.vehicleDates)
         ? item.vehicleDates
             .map((d) => new Date(d))
@@ -99,12 +105,19 @@ function generateInvoicePDF(invoice, res) {
 
       const rowHeight = Math.max(vehicleInfoHeight, descriptionHeight);
 
-      doc.text(item.quantity.toString(), quantityX, startY, {
+      // ✅ Quantity based on number of wash dates
+      const washesCount = Array.isArray(item.vehicleDates)
+        ? item.vehicleDates.length
+        : 1;
+
+      doc.text(washesCount.toString(), quantityX, startY, {
         width: 40,
         align: "right",
       });
 
-      doc.text(`KES ${item.amount.toFixed(2)}`, amountX, startY, {
+      const itemTotal = item.amount * washesCount;
+
+      doc.text(`KES ${itemTotal.toFixed(2)}`, amountX, startY, {
         width: 80,
         align: "right",
       });
