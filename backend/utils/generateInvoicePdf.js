@@ -89,13 +89,30 @@ function generateInvoicePDF(invoice, res) {
             .join(", ")
         : "";
 
-      // Calculate number of washes
       const washesCount = Array.isArray(item.vehicleDates)
         ? item.vehicleDates.length
         : 1;
 
       const itemTotal = item.amount * washesCount;
 
+      // Calculate heights of each column's content
+      const heightVehicleReg = doc.heightOfString(item.vehicleRegNumber, {
+        width: vehicleRegWidth,
+      });
+      const heightDescription = doc.heightOfString(item.description, {
+        width: descriptionWidth,
+      });
+      const heightDates = doc.heightOfString(sortedDates, {
+        width: datesWidth,
+      });
+
+      const rowHeight = Math.max(
+        heightVehicleReg,
+        heightDescription,
+        heightDates
+      );
+
+      // Draw all columns at startY
       doc.fontSize(12).text(item.vehicleRegNumber, startX, startY, {
         width: vehicleRegWidth,
       });
@@ -123,12 +140,10 @@ function generateInvoicePDF(invoice, res) {
         align: "right",
       });
 
-      // Move to next line with enough spacing
-      const maxHeight = doc.heightOfString(sortedDates, {
-        width: datesWidth,
-      });
-      doc.y = startY + maxHeight + 5;
+      // Move y to bottom of the tallest cell + spacing
+      doc.y = startY + rowHeight + 5;
 
+      // Row separator
       doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
     });
 
