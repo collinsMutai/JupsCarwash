@@ -1,10 +1,10 @@
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const helmet = require("helmet");
 const connectDB = require("./config/db");
 const cron = require("node-cron");
-require("dotenv").config();
 const {
   runAutomatedInvoiceJob,
 } = require("./services/invoiceAutomationService");
