@@ -22,7 +22,7 @@ function generateInvoicePDF(invoice, res) {
       .fontSize(22)
       .font("Helvetica-Bold")
       .fillColor("#333")
-      .text("Jups Carwash", 50, 50);
+      .text("H&C Carwash", 50, 50);
 
     doc
       .fontSize(12)
@@ -141,10 +141,10 @@ function generateInvoicePDF(invoice, res) {
       .fontSize(12)
       .text("Contact Us:", 50, doc.y + 10)
       .fontSize(10)
-      .text("Jups Carwash", 50, doc.y + 10)
+      .text("H&C Carwash", 50, doc.y + 10)
       .text("Opp Stabex Petrol Station, Litein.", 50, doc.y + 10)
-      .text("Email: chebethyjupiter@gmail.com", 50, doc.y + 10)
-      .text("Phone: 0729138753 | 0726097666", 50, doc.y + 10)
+      .text("Email: h&C@gmail.com", 50, doc.y + 10)
+      .text("Phone: 0726097666", 50, doc.y + 10)
       .moveDown(2);
 
     doc
