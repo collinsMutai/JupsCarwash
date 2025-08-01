@@ -17,7 +17,7 @@ function generateInvoicePDF(invoice, res) {
 
     doc.pipe(res);
 
-    // Header
+    // === Header ===
     doc
       .fontSize(22)
       .font("Helvetica-Bold")
@@ -38,7 +38,7 @@ function generateInvoicePDF(invoice, res) {
       .text("INVOICE", 50, 50, { align: "right" })
       .moveDown(2);
 
-    // Customer Info
+    // === Customer Info ===
     doc
       .fontSize(12)
       .fillColor("black")
@@ -49,7 +49,7 @@ function generateInvoicePDF(invoice, res) {
       .text(`Date: ${new Date(invoice.date).toLocaleDateString()}`)
       .moveDown(2);
 
-    // Table Header
+    // === Table Header ===
     const tableTop = doc.y;
     doc
       .fillColor("#333")
@@ -64,90 +64,108 @@ function generateInvoicePDF(invoice, res) {
       .text("Amount (KES)", 430, tableTop + 5, { width: 100, align: "right" })
       .fillColor("black");
 
+    // Bottom border of header
     doc
-      .moveTo(50, doc.y + 20)
-      .lineTo(550, doc.y + 20)
+      .moveTo(50, tableTop + 20)
+      .lineTo(550, tableTop + 20)
       .stroke();
-    doc.moveDown();
 
-    // Table Rows
-    invoice.items.forEach((item) => {
-      const startX = 55;
-      const startY = doc.y + 5;
+    doc.y = tableTop + 30; // add spacing after header
 
-      const vehicleRegWidth = 80;
-      const descriptionWidth = 110;
-      const datesWidth = 100;
-      const quantityX = 390;
-      const amountX = 430;
+    // === Table Rows ===
+invoice.items.forEach((item) => {
+  const startX = 55;
+  const startY = doc.y;
 
-      const sortedDates = Array.isArray(item.vehicleDates)
-        ? item.vehicleDates
-            .map((d) => new Date(d))
-            .sort((a, b) => b - a)
-            .map((d) => d.toLocaleDateString())
-            .join(", ")
-        : "";
+  const vehicleRegWidth = 80;
+  const descriptionWidth = 110;
+  const datesWidth = 100;
+  const quantityX = 390;
+  const amountX = 430;
 
-      const washesCount = Array.isArray(item.vehicleDates)
-        ? item.vehicleDates.length
-        : 1;
+  // Format dates
+  const sortedDates =
+    Array.isArray(item.vehicleDates) && item.vehicleDates.length > 0
+      ? item.vehicleDates
+          .map((d) => new Date(d))
+          .sort((a, b) => b - a)
+          .map((d) => d.toLocaleDateString())
+          .join(", ")
+      : "";
 
-      const itemTotal = item.amount * washesCount;
+  // Quantity fallback
+  const washesCount =
+    Array.isArray(item.vehicleDates) && item.vehicleDates.length > 0
+      ? item.vehicleDates.length
+      : item.quantity ?? 1;
 
-      // Calculate heights of each column's content
-      const heightVehicleReg = doc.heightOfString(item.vehicleRegNumber, {
-        width: vehicleRegWidth,
-      });
-      const heightDescription = doc.heightOfString(item.description, {
-        width: descriptionWidth,
-      });
-      const heightDates = doc.heightOfString(sortedDates, {
-        width: datesWidth,
-      });
+  const itemTotal = item.amount * washesCount;
 
-      const rowHeight = Math.max(
-        heightVehicleReg,
-        heightDescription,
-        heightDates
-      );
+  // Measure heights
+  const heightVehicleReg = doc.heightOfString(item.vehicleRegNumber, {
+    width: vehicleRegWidth,
+  });
+  const heightDescription = doc.heightOfString(item.description, {
+    width: descriptionWidth,
+  });
+  const heightDates = doc.heightOfString(sortedDates, {
+    width: datesWidth,
+  });
 
-      // Draw all columns at startY
-      doc.fontSize(12).text(item.vehicleRegNumber, startX, startY, {
-        width: vehicleRegWidth,
-      });
+  const contentHeight = Math.max(
+    heightVehicleReg,
+    heightDescription,
+    heightDates
+  );
 
-      doc.text(item.description, startX + vehicleRegWidth + 5, startY, {
-        width: descriptionWidth,
-      });
+  // Increase padding here (total padding, split top and bottom)
+  const rowPadding = 6;
 
-      doc.text(
-        sortedDates,
-        startX + vehicleRegWidth + descriptionWidth + 10,
-        startY,
-        {
-          width: datesWidth,
-        }
-      );
+  // Total row height = content height + padding (top + bottom)
+  const rowHeight = contentHeight + rowPadding;
 
-      doc.text(washesCount.toString(), quantityX, startY, {
-        width: 30,
-        align: "right",
-      });
+  // Adjust text start position to include top padding (half of total padding)
+  const textY = startY + rowPadding / 2;
 
-      doc.text(`KES ${itemTotal.toFixed(2)}`, amountX, startY, {
-        width: 100,
-        align: "right",
-      });
+  // Draw row content with padding
+  doc.fontSize(12).text(item.vehicleRegNumber, startX, textY, {
+    width: vehicleRegWidth,
+  });
 
-      // Move y to bottom of the tallest cell + spacing
-      doc.y = startY + rowHeight + 5;
+  doc.text(item.description, startX + vehicleRegWidth + 5, textY, {
+    width: descriptionWidth,
+  });
 
-      // Row separator
-      doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-    });
+  doc.text(
+    sortedDates,
+    startX + vehicleRegWidth + descriptionWidth + 10,
+    textY,
+    {
+      width: datesWidth,
+    }
+  );
 
-    // Total
+  doc.text(washesCount.toString(), quantityX, textY, {
+    width: 30,
+    align: "right",
+  });
+
+  doc.text(`KES ${itemTotal.toFixed(2)}`, amountX, textY, {
+    width: 100,
+    align: "right",
+  });
+
+  // Move cursor to bottom of row to start next row
+  doc.y = startY + rowHeight;
+
+  // Draw separator line
+  doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+});
+
+
+
+
+    // === Total Amount ===
     doc
       .moveDown(2)
       .fontSize(12)
@@ -155,7 +173,7 @@ function generateInvoicePDF(invoice, res) {
       .text("Total:", 400, doc.y, { continued: true })
       .text(`KES ${invoice.totalAmount.toFixed(2)}`);
 
-    // Footer
+    // === Footer ===
     doc
       .moveDown(3)
       .fontSize(12)
