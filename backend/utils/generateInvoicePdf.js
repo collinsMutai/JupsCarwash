@@ -58,25 +58,29 @@ function generateInvoicePDF(invoice, res) {
       .fillColor("white")
       .fontSize(12)
       .text("Vehicle Reg #", 55, tableTop + 5)
-      .text("Description", 200, tableTop + 5)
-      .text("Quantity", 380, tableTop + 5)
-      .text("Amount (KES)", 460, tableTop + 5)
-      .fillColor("black")
-      .moveDown();
+      .text("Description", 140, tableTop + 5)
+      .text("Dates Washed", 270, tableTop + 5)
+      .text("Qty", 390, tableTop + 5, { width: 30, align: "right" })
+      .text("Amount (KES)", 430, tableTop + 5, { width: 100, align: "right" })
+      .fillColor("black");
 
-    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+    doc
+      .moveTo(50, doc.y + 20)
+      .lineTo(550, doc.y + 20)
+      .stroke();
+    doc.moveDown();
 
     // Table Rows
     invoice.items.forEach((item) => {
       const startX = 55;
       const startY = doc.y + 5;
 
-      const vehicleRegWidth = 130;
-      const descriptionWidth = 160;
-      const quantityX = 380;
-      const amountX = 460;
+      const vehicleRegWidth = 80;
+      const descriptionWidth = 110;
+      const datesWidth = 100;
+      const quantityX = 390;
+      const amountX = 430;
 
-      // Sort and format wash dates
       const sortedDates = Array.isArray(item.vehicleDates)
         ? item.vehicleDates
             .map((d) => new Date(d))
@@ -85,44 +89,45 @@ function generateInvoicePDF(invoice, res) {
             .join(", ")
         : "";
 
-      const vehicleInfo = `${item.vehicleRegNumber}\n${sortedDates}`;
-
-      doc.fontSize(12).text(vehicleInfo, startX, startY, {
-        width: vehicleRegWidth,
-      });
-
-      const vehicleInfoHeight = doc.heightOfString(vehicleInfo, {
-        width: vehicleRegWidth,
-      });
-
-      doc.text(item.description, startX + vehicleRegWidth + 10, startY, {
-        width: descriptionWidth,
-      });
-
-      const descriptionHeight = doc.heightOfString(item.description, {
-        width: descriptionWidth,
-      });
-
-      const rowHeight = Math.max(vehicleInfoHeight, descriptionHeight);
-
-      // ✅ Quantity based on number of wash dates
+      // Calculate number of washes
       const washesCount = Array.isArray(item.vehicleDates)
         ? item.vehicleDates.length
         : 1;
 
-      doc.text(washesCount.toString(), quantityX, startY, {
-        width: 40,
-        align: "right",
-      });
-
       const itemTotal = item.amount * washesCount;
 
-      doc.text(`KES ${itemTotal.toFixed(2)}`, amountX, startY, {
-        width: 80,
+      doc.fontSize(12).text(item.vehicleRegNumber, startX, startY, {
+        width: vehicleRegWidth,
+      });
+
+      doc.text(item.description, startX + vehicleRegWidth + 5, startY, {
+        width: descriptionWidth,
+      });
+
+      doc.text(
+        sortedDates,
+        startX + vehicleRegWidth + descriptionWidth + 10,
+        startY,
+        {
+          width: datesWidth,
+        }
+      );
+
+      doc.text(washesCount.toString(), quantityX, startY, {
+        width: 30,
         align: "right",
       });
 
-      doc.y = startY + rowHeight + 5;
+      doc.text(`KES ${itemTotal.toFixed(2)}`, amountX, startY, {
+        width: 100,
+        align: "right",
+      });
+
+      // Move to next line with enough spacing
+      const maxHeight = doc.heightOfString(sortedDates, {
+        width: datesWidth,
+      });
+      doc.y = startY + maxHeight + 5;
 
       doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
     });
